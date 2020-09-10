@@ -10,6 +10,10 @@
 
 
 
+# Rcpp::compileAttributes() #when changeing c++ code
+# devtools::document() #to update whole thing
+# devtools::load_all() #to temp install
+# library(nphawkes) #to use
 
 # Nonparametric Hawkes ----------------------------------------------------
 
@@ -65,22 +69,19 @@ nph <- function(dates, ref_date = min(dates),
                 g_length = 6, stopwhen = 1e-3,
                 time_unit = "day", dist_unit = "mile"){
 
-  usethis::use_package("Rcpp")
-  usethis::use_package("lubridate")
-
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_bins.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_dist_matrix1.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_time_matrix.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_dist_bins.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_time_bins.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_mark_matrix.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/1_p0.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/2_br.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/3_trig_marks.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/3_trig_time.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/3_trig_space.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/4_update1.cpp")
-  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/5_check.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_bins.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_dist_matrix1.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_time_matrix.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_dist_bins.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_time_bins.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_mark_matrix.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/1_p0.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/2_br.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/3_trig_marks.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/3_trig_time.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/3_trig_space.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/4_update1.cpp")
+  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/5_check.cpp")
 
   # create times from dates
   df = data.frame(dates, lat, lon, marks)
@@ -97,7 +98,7 @@ nph <- function(dates, ref_date = min(dates),
     ref_date = lubridate::mdy(ref_date)
   }
 
-  times = lubridate::time_length(lubridate:interval(ref_date, dates_clean), time_unit)
+  times = lubridate::time_length(lubridate::interval(ref_date, dates_clean), time_unit)
   times = times + runif(length(times), 0, 1)
   df$times = times
   df = df[order(df$times),]
@@ -112,7 +113,9 @@ nph <- function(dates, ref_date = min(dates),
 
   # establish time, space differences for each event
   time_mat = get_time(times)
-  dist_mat = get_dist(lat, lon)
+  dist_mat = matrix(nrow = length(lat),
+                    ncol = length(lat),
+                    data = rep(0,length(lat)^2)) #get_dist(lat, lon)
 
   # convert distances to correct units
   if (dist_unit == "mile") {
@@ -157,6 +160,7 @@ nph <- function(dates, ref_date = min(dates),
   p0 = init_p0(times)
   max_diff = 1
 
+  uu = 1
   while( max_diff > stopwhen){
     br = calc_br(p0, times)
     g = get_g(p0, g_bins, time_mat)
@@ -168,6 +172,9 @@ nph <- function(dates, ref_date = min(dates),
                  br, time_bins, dist_bins)
     max_diff = check_p(p0, p)
     p0 = p
+    uu = uu + 1
+    print(uu)
+    print(p0[1:5, 1:5])
   }
   # is the max value per row background or trig?
   max_event = c()

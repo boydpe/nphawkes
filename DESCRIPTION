@@ -10,4 +10,12 @@ Description: This package analyzes Hawkes processes using nonparametric
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-
+Suggests: 
+    testthat
+Imports: 
+    Rcpp,
+    lubridate,
+    ggplot2,
+    dplyr
+RoxygenNote: 7.1.1
+LinkingTo: Rcpp
