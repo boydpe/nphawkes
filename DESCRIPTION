@@ -1,11 +1,13 @@
 Package: nphawkes
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Nonparametric Hawkes Processes
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Authors@R: person("Peter", "Boyd", email = "boydpe@oregonstate.edu",
+  role = c("aut", "cre"))
+Description: This package analyzes Hawkes processes using nonparametric 
+    methods. It will utilize the Model Indpendent Stochastic Deculstering
+    algorithm and super-thinning for model fit assessment. 
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+

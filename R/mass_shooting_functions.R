@@ -8,19 +8,7 @@
 # library(lubridate)
 # library(tidyverse)
 
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_bins.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_dist_matrix1.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_time_matrix.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_dist_bins.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_time_bins.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_mark_matrix.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/1_p0.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/2_br.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/3_trig_marks.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/3_trig_time.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/3_trig_space.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/4_update1.cpp")
-Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/5_check.cpp")
+
 
 
 # Nonparametric Hawkes ----------------------------------------------------
@@ -31,6 +19,7 @@ Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/5_check.cpp")
 #'
 #' This function uses nonparametric procedures to analyze a Hawkes
 #' process in temporal or spatio-temporal domain, with or without marks.
+#'
 #'
 #' @param dates a vector of dates, as LIST DATE FORMATS ALLOWED
 #' @param lat a vector of latitudes, omit if not using spatial data
@@ -75,6 +64,24 @@ nph <- function(dates, ref_date = min(dates),
                 k_length = 6, h_length = 6,
                 g_length = 6, stopwhen = 1e-3,
                 time_unit = "day", dist_unit = "mile"){
+
+  usethis::use_package("Rcpp")
+  usethis::use_package("lubridate")
+
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_bins.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_dist_matrix1.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_time_matrix.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_dist_bins.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_time_bins.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/0_mark_matrix.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/1_p0.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/2_br.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/3_trig_marks.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/3_trig_time.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/3_trig_space.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/4_update1.cpp")
+  Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/R/5_check.cpp")
+
   # create times from dates
   df = data.frame(dates, lat, lon, marks)
   # put dates in correct format
@@ -90,8 +97,7 @@ nph <- function(dates, ref_date = min(dates),
     ref_date = lubridate::mdy(ref_date)
   }
 
-  times = lubridate::time_length(
-    lubridate:interval(ref_date, dates_clean), time_unit)
+  times = lubridate::time_length(lubridate:interval(ref_date, dates_clean), time_unit)
   times = times + runif(length(times), 0, 1)
   df$times = times
   df = df[order(df$times),]
