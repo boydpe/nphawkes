@@ -4,7 +4,7 @@
 \alias{ci_hist}
 \title{Histogram of super-thinned process}
 \usage{
-ci_hist(superthin, nbins = 30, date_break = "1 years", date_labels = "\%Y")
+ci_hist(superthin, nbins = 30, date_break = "1 year", date_label = "\%Y")
 }
 \arguments{
 \item{superthin}{the output from \code{super_thin()}}

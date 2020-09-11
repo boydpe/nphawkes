@@ -41,8 +41,8 @@ get_g <- function(p0, g_bins, time_mat) {
     .Call('_nphawkes_get_g', PACKAGE = 'nphawkes', p0, g_bins, time_mat)
 }
 
-update_p <- function(p0, time_mat, dist_mat, mark_mat, g, h, k, h_bins, g_bins, k_bins, br, time_bins, dist_bins) {
-    .Call('_nphawkes_update_p', PACKAGE = 'nphawkes', p0, time_mat, dist_mat, mark_mat, g, h, k, h_bins, g_bins, k_bins, br, time_bins, dist_bins)
+update_p <- function(p0, time_mat, dist_mat, mark_mat, g, h, k, h_bins, g_bins, k_bins, br, time_bins, dist_bins, lat) {
+    .Call('_nphawkes_update_p', PACKAGE = 'nphawkes', p0, time_mat, dist_mat, mark_mat, g, h, k, h_bins, g_bins, k_bins, br, time_bins, dist_bins, lat)
 }
 
 check_p <- function(p0, p) {

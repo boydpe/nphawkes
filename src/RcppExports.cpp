@@ -127,8 +127,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // update_p
-NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix dist_mat, NumericVector mark_mat, NumericVector g, NumericVector h, NumericVector k, NumericVector h_bins, NumericVector g_bins, NumericVector k_bins, double br, NumericMatrix time_bins, NumericMatrix dist_bins);
-RcppExport SEXP _nphawkes_update_p(SEXP p0SEXP, SEXP time_matSEXP, SEXP dist_matSEXP, SEXP mark_matSEXP, SEXP gSEXP, SEXP hSEXP, SEXP kSEXP, SEXP h_binsSEXP, SEXP g_binsSEXP, SEXP k_binsSEXP, SEXP brSEXP, SEXP time_binsSEXP, SEXP dist_binsSEXP) {
+NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix dist_mat, NumericVector mark_mat, NumericVector g, NumericVector h, NumericVector k, NumericVector h_bins, NumericVector g_bins, NumericVector k_bins, double br, NumericMatrix time_bins, NumericMatrix dist_bins, NumericVector lat);
+RcppExport SEXP _nphawkes_update_p(SEXP p0SEXP, SEXP time_matSEXP, SEXP dist_matSEXP, SEXP mark_matSEXP, SEXP gSEXP, SEXP hSEXP, SEXP kSEXP, SEXP h_binsSEXP, SEXP g_binsSEXP, SEXP k_binsSEXP, SEXP brSEXP, SEXP time_binsSEXP, SEXP dist_binsSEXP, SEXP latSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -145,7 +145,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type br(brSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type time_bins(time_binsSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type dist_bins(dist_binsSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_p(p0, time_mat, dist_mat, mark_mat, g, h, k, h_bins, g_bins, k_bins, br, time_bins, dist_bins));
+    Rcpp::traits::input_parameter< NumericVector >::type lat(latSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_p(p0, time_mat, dist_mat, mark_mat, g, h, k, h_bins, g_bins, k_bins, br, time_bins, dist_bins, lat));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -173,7 +174,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nphawkes_get_k", (DL_FUNC) &_nphawkes_get_k, 3},
     {"_nphawkes_get_h", (DL_FUNC) &_nphawkes_get_h, 3},
     {"_nphawkes_get_g", (DL_FUNC) &_nphawkes_get_g, 3},
-    {"_nphawkes_update_p", (DL_FUNC) &_nphawkes_update_p, 13},
+    {"_nphawkes_update_p", (DL_FUNC) &_nphawkes_update_p, 14},
     {"_nphawkes_check_p", (DL_FUNC) &_nphawkes_check_p, 2},
     {NULL, NULL, 0}
 };

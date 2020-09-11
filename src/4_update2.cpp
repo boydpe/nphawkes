@@ -7,7 +7,7 @@ NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix d
                        NumericVector mark_mat, NumericVector g, NumericVector h,
                        NumericVector k, NumericVector h_bins, NumericVector g_bins,
                        NumericVector k_bins, double br, NumericMatrix time_bins,
-                       NumericMatrix dist_bins){
+                       NumericMatrix dist_bins, NumericVector lat){
 
   int n_i = pow(p0.size(), 0.5);
   double num_p;
@@ -24,7 +24,7 @@ NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix d
     }
   }
 
-  if ( sum_mat != 0){
+  if ( sum(lat) != 0){
     for (int i = 0; i < n_i; i++){
       for (int j = 0; j < n_i; j++){
         if  ( j < i){
@@ -83,7 +83,7 @@ NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix d
         }
 
         else {
-          p(i,j) = 0;
+          p(i,j) = 0;//change to 0
         }
       }
     }

@@ -7,7 +7,7 @@
 ci_plot(
   model,
   min_date = model$input$ref_date,
-  max_date = max(model$data$dates),
+  max_date = model$data$dates[nrow(model$data)],
   superthin
 )
 }

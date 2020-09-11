@@ -160,7 +160,7 @@ nph <- function(dates, ref_date = min(dates),
   p0 = init_p0(times)
   max_diff = 1
 
-  uu = 1
+  # uu = 1
   while( max_diff > stopwhen){
     br = calc_br(p0, times)
     g = get_g(p0, g_bins, time_mat)
@@ -169,12 +169,13 @@ nph <- function(dates, ref_date = min(dates),
     p = update_p(p0, time_mat, dist_mat, mark_mat,
                  g, h, k,
                  h_bins, g_bins, k_bins,
-                 br, time_bins, dist_bins)
+                 br, time_bins, dist_bins, lat)
+    # print(p[1:5, 1:5])
     max_diff = check_p(p0, p)
     p0 = p
-    uu = uu + 1
-    print(uu)
-    print(p0[1:5, 1:5])
+    # uu = uu + 1
+    # print(uu)
+
   }
   # is the max value per row background or trig?
   max_event = c()
@@ -442,7 +443,7 @@ super_thin = function(K = "median_ci",
   ci_sim = data.frame(times = sim_pp$Time,
                       lat = sim_pp$lat, lon = sim_pp$lon,
                    cond_int = cond_int_sim, p = NA,
-                   keep = NA, type = NA)
+                   keep = NA, type = NA, marks = sim_pp$marks)
   # simulated data
   ci_sim$type = "sim"
   ci_sim$Date = as.Date(model$ref_date + ci_sim$times)
@@ -571,14 +572,14 @@ trig_plots = function(model, g_max = max(model$g_bins),
                        se = c(se_h, se_h[length(se_h)]))
 
   # Time Plot
-  trig_g = ggplot2::ggplot(time_df, aes(time, g)) +
+  trig_g = ggplot2::ggplot(time_df, ggplot2::aes(time, g)) +
     ggplot2::coord_cartesian(xlim = c(0, g_max)) +
     ggplot2::xlab(paste("t (time in ", model$input$time_unit, "s)", sep = "")) +
     ggplot2::ylab("g(t)")
 
   for (i in 1:(n1-1)){
     trig_g = trig_g +
-      ggplot2::geom_polygon(aes(x = x, y = y),
+      ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
                                    data = data.frame(
                                      x = c(time_df$time[i], time_df$time[i+1],
                                            time_df$time[i+1], time_df$time[i]),
@@ -589,9 +590,9 @@ trig_plots = function(model, g_max = max(model$g_bins),
                                    fill = "grey")
   }
 
-  trig_g = trig_g + ggplot2::geom_step(aes(group=1)) +
+  trig_g = trig_g + ggplot2::geom_step(ggplot2::aes(group=1)) +
     ggplot2::scale_x_continuous(breaks = model$g_bins) +
-    ggplot2::geom_point(aes(x = x, y = y, fill = type),
+    ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
                shape = 21,
                data = data.frame(
                  x = sort(rep(time_df$time, 2))[-c(1,2,2*n1 -1 ,2*n1)],
@@ -603,13 +604,13 @@ trig_plots = function(model, g_max = max(model$g_bins),
 
   # Magnitude Plot
   if (sum(model$mark_bins) != 0){
-  trig_k = ggplot2::ggplot(mag_df, aes(magnitude, k)) +
+  trig_k = ggplot2::ggplot(mag_df, ggplot2::aes(magnitude, k)) +
     ggplot2::coord_cartesian(xlim = c(k_min, k_max)) +
     ggplot2::xlab(paste("m (", mag_label, ")", sep = "")) +
     ggplot2::ylab("k(m)")
 
   for (i in 1:(n2-1)){
-    trig_k = trig_k + ggplot2::geom_polygon(aes(x = x, y = y),
+    trig_k = trig_k + ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
                                    data = data.frame(
                                      x = c(mag_df$magnitude[i], mag_df$magnitude[i+1],
                                            mag_df$magnitude[i+1], mag_df$magnitude[i]),
@@ -620,10 +621,10 @@ trig_plots = function(model, g_max = max(model$g_bins),
                                    fill = "grey")
   }
 
-  trig_k = trig_k + ggplot2::geom_step(aes(group=1)) +
-    ggpplot2::scale_x_continuous(breaks =
+  trig_k = trig_k + ggplot2::geom_step(ggplot2::aes(group=1)) +
+    ggplot2::scale_x_continuous(breaks =
                          c(min(model$input$marks), model$k_bins[-1])) +
-    ggplot2::geom_point(aes(x = x, y = y, fill = type),
+    ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
                shape = 21,
                data = data.frame(
                  x = sort(rep(mag_df$magnitude, 2))[-c(1,2,2*n2 -1 ,2*n2)],
@@ -637,13 +638,13 @@ trig_plots = function(model, g_max = max(model$g_bins),
   #Space Plot
   if(sum(model$dist_bins) != 0) {
 
-  trig_h = ggplot2::ggplot(dist_df, aes(dist, g)) +
+  trig_h = ggplot2::ggplot(dist_df, ggplot2::aes(dist, g)) +
     ggplot2::coord_cartesian(xlim = c(0, h_max)) +
     ggplot2::xlab(paste("s (distance in ", model$input$dist_unit, "s)", sep = "")) +
     ggplot2::ylab("h(s)")
 
   for (i in 1:(n1-1)){
-    trig_h = trig_h + ggplot2::geom_polygon(aes(x = x, y = y),
+    trig_h = trig_h + ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
                                    data = data.frame(
                                      x = c(dist_df$dist[i], dist_df$dist[i+1],
                                            dist_df$dist[i+1], dist_df$dist[i]),
@@ -654,9 +655,9 @@ trig_plots = function(model, g_max = max(model$g_bins),
                                    fill = "grey")
   }
 
-  trig_h = trig_h + ggplot2::geom_step(aes(group=1)) +
+  trig_h = trig_h + ggplot2::geom_step(ggplot2::aes(group=1)) +
     ggplot2::scale_x_continuous(breaks = model$h_bins) +
-    ggplot2::geom_point(aes(x = x, y = y, fill = type),
+    ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
                shape = 21,
                data = data.frame(
                  x = sort(rep(dist_df$dist, 2))[-c(1,2,2*n3 -1 ,2*n3)],
@@ -715,11 +716,11 @@ st_plot = function(superthin){
   #   ggplot2::theme(axis.title.y=element_blank(),
   #         axis.text.y=element_blank(),
   #         axis.ticks.y=element_blank())
-  plot2 = ggplot2::ggplot(data = superthin, aes(x = Date, col = type)) +
-    ggplot2::geom_segment(aes(x = Date, y = y, yend = y + 1, xend = Date),
+  plot2 = ggplot2::ggplot(data = superthin, ggplot2::aes(x = Date, col = type)) +
+    ggplot2::geom_segment(ggplot2::aes(x = Date, y = y, yend = y + 1, xend = Date),
                  show.legend = FALSE) +
-    ggplot2::theme(axis.title.y=element_blank(),
-          axis.ticks.y=element_blank()) +
+    ggplot2::theme(axis.title.y= ggplot2::element_blank(),
+          axis.ticks.y=ggplot2::element_blank()) +
           #axis.text.y=element_blank()) +
     ggplot2::scale_color_manual(breaks = c("sim", "retain", "thin"),
                        values=c("grey3", "grey40", "grey70")) +
@@ -753,10 +754,10 @@ st_plot = function(superthin){
 #' @return a histogram of the super-thinned process.
 #' @export
 ci_hist = function(superthin, nbins = 30,
-                   date_break = "1 years", date_labels = "%Y"){
+                   date_break = "1 year", date_label = "%Y"){
   st = superthin[which(superthin$type != "thin"),]
   out = ggplot2::ggplot(data = st) +
-    ggplot2::geom_histogram(aes(x = Date), bins = nbins) +
+    ggplot2::geom_histogram(ggplot2::aes(x = Date), bins = nbins) +
     ggplot2::scale_x_date(date_breaks = date_break,
                           date_labels = date_label) +
     ggplot2::ylab("frequency")
@@ -781,21 +782,24 @@ ci_hist = function(superthin, nbins = 30,
 #' @return a plot that shows the estimated conditional intensity with the number of monthly events
 #' @export
 ci_plot = function(model, min_date = model$input$ref_date,
-                   max_date = max(model$data$dates),
+                   max_date = model$data$dates[nrow(model$data)],
                    superthin){
 
   df = model$data
-  df$Year = year(df$dates)
-  df$Month = month(df$dates)
+  df$dates = lubridate::mdy(df$dates)
+  df$Year = lubridate::year(df$dates)
+  df$Month = lubridate::month(df$dates)
 
   min = as.Date(min_date)
-  max = as.Date(max_date)
+  max = lubridate::mdy(max_date)
 
   df_counts  = df %>% dplyr::group_by(Year, Month) %>%
-    dplyr::summarize(n = n(), Day = 1) %>%
-    dplyr::mutate(date = lubridate::make_date(Year, Month, Day))
+    dplyr::summarize(n = dplyr::n(), Day = 1) %>%
+    dplyr::mutate(Date = lubridate::make_date(Year, Month, Day))
 
   ci_one = superthin %>%
+    dplyr::mutate(Year = lubridate::year(superthin$Date)) %>%
+    dplyr::mutate(Month = lubridate::month(superthin$Date)) %>%
     dplyr::group_by(Year, Month) %>%
     dplyr::summarize(cond_int_sum = sum(cond_int),
             cond_int_mean = mean(cond_int),
@@ -807,14 +811,14 @@ ci_plot = function(model, min_date = model$input$ref_date,
     dplyr::select(-c(cond_int_sum, cond_int_mean, cond_int_med, ndays)) %>%
     dplyr::mutate(type = "est")
 
-  tmp = data.frame(Date = seq(min, max, by = "month"))
-  tmp %>% dplyr::left_join(df_stanford_counts) %>%
+  tmp = data.frame(Date = seq.Date(min, max, by = "month"))
+  tmp %>% dplyr::left_join(df_counts) %>%
     dplyr::mutate(n = ifelse(is.na(n), 0, n)) %>%
     dplyr::mutate(type = "data") %>%
     dplyr::bind_rows(ci_one) %>%
     ggplot2::ggplot() +
-      ggplot2::geom_line(aes(x = Date, y = n, linetype = type)) +
-      ggplot2::theme(axis.title.y=element_blank(),
+      ggplot2::geom_line(ggplot2::aes(x = Date, y = n, linetype = type)) +
+      ggplot2::theme(axis.title.y=ggplot2::element_blank(),
         legend.position = "right") +
         ggplot2::scale_linetype_manual(name = "Number of \nMonthly Events",
                         labels = c("Observed", "Estimated"),
