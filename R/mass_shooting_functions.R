@@ -381,15 +381,15 @@ super_thin = function(K = "median_ci",
   rate = (round(mean(marks)) - min(marks))^(-1)
   sim_pp$marks = round(rexp(n2, rate)) + min(marks)
   # not actually using simulated marks - so no parametric assumptions
-  region = ggplot2::map_data(maps::map(), region = region)
-  region = region[,c('long', 'lat')] %>%
-    sp::Polygon() %>%
-    sp::spsample(n = n2, type = "random")
-  sim_lat = region$y
-  sim_lon = region$x
   if(sum(model$lat) == 0){
     sim_pp = cbind(sim_pp, lat = rep(0,n2), lon = rep(0,n2))
   } else{
+    region = ggplot2::map_data(maps::map(), region = region)
+    region = region[,c('long', 'lat')] %>%
+      sp::Polygon() %>%
+      sp::spsample(n = n2, type = "random")
+    sim_lat = region$y
+    sim_lon = region$x
     sim_pp = cbind(sim_pp, lat = sim_lat, lon = sim_lon)
   }
 
@@ -698,8 +698,6 @@ trig_plots = function(model, g_max = max(model$g_bins),
 
 # Super-thinning Plot -----------------------------------------------------
 
-
-# ggplot2
 #' Super-thinning Plot
 #'
 #' This function exports a plot displaying the performance of the super-thinning procedure.
@@ -766,10 +764,8 @@ st_plot = function(superthin, method = "superthin", time_label = "Year"){
       ggplot2::scale_y_continuous(breaks = c(0,1,2) + 0.5,
                                   labels = c("observed", "simulated"))
   }
-
   return(p)
 }
-
 
 
 # Condtitional Intensity Histogram -----------------------------------------

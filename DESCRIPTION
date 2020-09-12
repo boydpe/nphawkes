@@ -18,7 +18,9 @@ Imports:
     Rcpp,
     lubridate,
     ggplot2,
-    dplyr
+    dplyr, 
+    maps,
+    sp
 RoxygenNote: 7.1.1
 LinkingTo: Rcpp
 VignetteBuilder: knitr

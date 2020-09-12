@@ -4,7 +4,13 @@
 \alias{super_thin}
 \title{Super-thinning}
 \usage{
-super_thin(K = "median_ci", model)
+super_thin(
+  K = "median_ci",
+  model,
+  method = "superthin",
+  map = world,
+  region = "."
+)
 }
 \arguments{
 \item{K}{a constant or character string that governs the amount of thinning and
@@ -12,6 +18,12 @@ superposing that is implemented. Can be a constant value, the median, mean, mini
  conditional intensity: "median_ci", "mean_ci", "min_ci", or "max_ci", respectively.}
 
 \item{model}{the output from \code{nph()}}
+
+\item{method}{character string that defines residual analysis method as "superthin", "thin", or "superpose"}
+
+\item{map}{name of map provided by the maps package, defaults to maps::world}
+
+\item{region}{name of subregion to include, defaults to entirety of map}
 }
 \value{
 a data frame which includes the time, location, and estimted conditional intensity of events.
