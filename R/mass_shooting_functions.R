@@ -299,13 +299,17 @@ cond_int = function(model) {
 #'  conditional intensity: "median_ci", "mean_ci", "min_ci", or "max_ci", respectively.
 #'
 #' @param model the output from \code{nph()}
+#' @param method character string that defines residual analysis method as "superthin", "thin", or "superpose"
+#' @param map name of map provided by the maps package, defaults to maps::world
+#' @param region name of subregion to include, defaults to entirety of map
 #'
 #' @return a data frame which includes the time, location, and estimted conditional intensity of events.
 #' The type of event, either observed or simulated, is noted along with the probability that the event was kept
 #' and wheter or not the point was in fact retained.
 #' @export
 super_thin = function(K = "median_ci",
-                      model){
+                      model, method = "superthin",
+                      map = world, region = "."){
 
   # FIRST: CI FOR DATA
   times = model$data$times
@@ -377,8 +381,12 @@ super_thin = function(K = "median_ci",
   rate = (round(mean(marks)) - min(marks))^(-1)
   sim_pp$marks = round(rexp(n2, rate)) + min(marks)
   # not actually using simulated marks - so no parametric assumptions
-  sim_lat = runif(n2, 0, 1)
-  sim_lon = runif(n2, 0, 1)
+  region = ggplot2::map_data(maps::map(), region = region)
+  region = region[,c('long', 'lat')] %>%
+    sp::Polygon() %>%
+    sp::spsample(n = n2, type = "random")
+  sim_lat = region$y
+  sim_lon = region$x
   if(sum(model$lat) == 0){
     sim_pp = cbind(sim_pp, lat = rep(0,n2), lon = rep(0,n2))
   } else{
@@ -456,6 +464,13 @@ super_thin = function(K = "median_ci",
   ci_st = ci_st[order(ci_st$times),]
   #ci_st$rv = runif(nrow(ci_st), 0, 1)
 
+  if (method == "superthin") {
+    ci_st = ci_st
+  } else if (method == "thin") {
+    ci_st = ci_st %>% dplyr::filter(type != "sim")
+  } else {
+    ci_st = ci_st %>% dplyr::mutate(replace(type, type == "thin", "retain"))
+  }
   return(ci_st)
 }
 
@@ -745,7 +760,6 @@ st_plot = function(superthin, method = "superthin", time_label = "Year"){
                             show.legend = FALSE) +
       ggplot2::theme(axis.title.y= ggplot2::element_blank(),
                      axis.ticks.y=ggplot2::element_blank()) +
-      #axis.text.y=element_blank()) +
       ggplot2::scale_color_manual(breaks = c("sim", "observed"),
                                   values=c("grey3", "grey40")) +
       ggplot2::xlab(time_label) +
