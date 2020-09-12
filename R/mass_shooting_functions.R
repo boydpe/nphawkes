@@ -1,14 +1,6 @@
 # Peter Boyd
 # Mass Shooting Functions
 
-# library(Rcpp)
-# library(ggplot2)
-# library(gridExtra)
-# nah....library(grid)
-# library(lubridate)
-# library(tidyverse)
-
-
 
 # Rcpp::compileAttributes() #when changeing c++ code
 # devtools::document() #to update whole thing
@@ -69,20 +61,6 @@ nph <- function(dates, ref_date = min(dates),
                 g_length = 6, stopwhen = 1e-3,
                 time_unit = "day", dist_unit = "mile"){
 
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_bins.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_dist_matrix1.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_time_matrix.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_dist_bins.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_time_bins.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/0_mark_matrix.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/1_p0.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/2_br.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/3_trig_marks.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/3_trig_time.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/3_trig_space.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/4_update1.cpp")
-  # Rcpp::sourceCpp("~/OSU/PhD/Packages/nphawkes/src/5_check.cpp")
-
   # create times from dates
   df = data.frame(dates, lat, lon, marks)
   # put dates in correct format
@@ -113,9 +91,30 @@ nph <- function(dates, ref_date = min(dates),
 
   # establish time, space differences for each event
   time_mat = get_time(times)
-  dist_mat = matrix(nrow = length(lat),
-                    ncol = length(lat),
-                    data = rep(0,length(lat)^2)) #get_dist(lat, lon)
+  get_dist1 = function(lat, lon){
+
+    n = length(lat)
+    dist_mat = matrix(data = NA, nrow = n, ncol = n)
+    R = 6371e3
+
+    for (i in 1:n){
+      for (j in 1:n){
+        phi1 = lat[i]*pi/180
+        phi2 = lat[j]*pi/180
+        latdiff = (lat[j] - lat[i])*pi/180
+        londiff = (lon[j] - lon[i])*pi/180
+
+        a = sin(latdiff/2)*sin(latdiff/2) +
+          cos(phi1)*cos(phi2)*sin(londiff/2)*sin(londiff/2)
+        b = 2*atan2(sqrt(a), sqrt(1-a))
+        d = R*b
+
+        dist_mat[i,j] = d
+      }
+    }
+    return(dist_mat)
+  }
+  dist_mat = get_dist1(lat, lon)
 
   # convert distances to correct units
   if (dist_unit == "mile") {
@@ -691,11 +690,14 @@ trig_plots = function(model, g_max = max(model$g_bins),
 #' This function exports a plot displaying the performance of the super-thinning procedure.
 #'
 #' @param superthin the output from \code{super_thin()}
+#' @param method chacter string denoting if the residual analysis method utilized was
+#' "superthin", "thin", or "superpose"
+#' @param time_label character string that provides the frequency of tick marks on the x-axis
 #'
 #' @return a tiered plot with superposed points on the top tier, points that were retained, not thinned,
 #' on the middle tier, and points that were thinned on the bottom tier.
 #' @export
-st_plot = function(superthin){
+st_plot = function(superthin, method = "superthin", time_label = "Year"){
 
   superthin$y = rep(0, nrow(superthin))
   for (i in 1:nrow(superthin)) {
@@ -708,15 +710,8 @@ st_plot = function(superthin){
     }
   }
 
-
-  labs = c("thinned", "retained", "superimposed")
-  labs = c("a", "b", "c")
-  # plot1 = ggplot2::ggplot(data = superthin, aes(x = times, y = rv, col = type)) +
-  #   ggplot2::geom_point() +
-  #   ggplot2::theme(axis.title.y=element_blank(),
-  #         axis.text.y=element_blank(),
-  #         axis.ticks.y=element_blank())
-  plot2 = ggplot2::ggplot(data = superthin, ggplot2::aes(x = Date, col = type)) +
+  if (method == "superthin"){
+    p = ggplot2::ggplot(data = superthin, ggplot2::aes(x = Date, col = type)) +
     ggplot2::geom_segment(ggplot2::aes(x = Date, y = y, yend = y + 1, xend = Date),
                  show.legend = FALSE) +
     ggplot2::theme(axis.title.y= ggplot2::element_blank(),
@@ -724,16 +719,41 @@ st_plot = function(superthin){
           #axis.text.y=element_blank()) +
     ggplot2::scale_color_manual(breaks = c("sim", "retain", "thin"),
                        values=c("grey3", "grey40", "grey70")) +
-    ggplot2::xlab("Year") +
+    ggplot2::xlab(time_label) +
     ggplot2::scale_y_continuous(breaks = c(0,1,2) + 0.5,
                        labels = c("thinned", "retained", "simulated"))
-  # plot3 = ggplot2::ggplot(data = superthin, aes(x = Time, y = cond_int,
-  #                                      col = type, shape = type)) +
-  #   ggplot2::geom_point()
 
-  #out = grid.arrange(plot2)
-  out = plot2
-  return(out)
+  } else if (method == "thin"){
+    p = superthin %>% dplyr::filter(type != "sim") %>%
+    ggplot2::ggplot(ggplot2::aes(x = Date, col = type)) +
+      ggplot2::geom_segment(ggplot2::aes(x = Date, y = y, yend = y + 1, xend = Date),
+                            show.legend = FALSE) +
+      ggplot2::theme(axis.title.y= ggplot2::element_blank(),
+                     axis.ticks.y=ggplot2::element_blank()) +
+      #axis.text.y=element_blank()) +
+      ggplot2::scale_color_manual(breaks = c("retain", "thin"),
+                                  values=c("grey40", "grey70")) +
+      ggplot2::xlab(time_label) +
+      ggplot2::scale_y_continuous(breaks = c(0,1,2) + 0.5,
+                                  labels = c("thinned", "retained"))
+
+  } else {
+    p = superthin %>% dplyr::mutate(type = replace(type, type == "thin", "retain")) %>%
+      dplyr::mutate(replace(type, type == "retain", "observed")) %>%
+      ggplot2::ggplot(data = superthin, ggplot2::aes(x = Date, col = type)) +
+      ggplot2::geom_segment(ggplot2::aes(x = Date, y = y, yend = y + 1, xend = Date),
+                            show.legend = FALSE) +
+      ggplot2::theme(axis.title.y= ggplot2::element_blank(),
+                     axis.ticks.y=ggplot2::element_blank()) +
+      #axis.text.y=element_blank()) +
+      ggplot2::scale_color_manual(breaks = c("sim", "observed"),
+                                  values=c("grey3", "grey40")) +
+      ggplot2::xlab(time_label) +
+      ggplot2::scale_y_continuous(breaks = c(0,1,2) + 0.5,
+                                  labels = c("observed", "simulated"))
+  }
+
+  return(p)
 }
 
 
