@@ -17,7 +17,7 @@
 #' process in temporal or spatio-temporal domain, with or without marks.
 #'
 #'
-#' @param dates a vector of dates, as LIST DATE FORMATS ALLOWED
+#' @param dates a vector of dates, or times since initial event, as LIST DATE FORMATS ALLOWED
 #' @param lat a vector of latitudes, omit if not using spatial data
 #' @param lon a vector of longitudes, omit if not using spatial data
 #' @param marks a vecotr of marks, or magnitudes, omit if not using marked process
@@ -32,6 +32,8 @@
 #' @param k_length a scalar to define the number of desired magnitude bins
 #' @param ref_date a date to serve as time 0, defaults to earliest observation
 #' @param time_of_day character string that lists the time of day of events, as hour:minute:second
+#' @param just_time TRUE or FALSE object. TRUE if \code{dates} object is a vector of only times,
+#' indicating time elapsed since start time
 #' @param time_unit character string that specifies the desired unit of time
 #' @param dist_unit character string that specifies the desired unit of distance: meter, kilometer, or mile
 #' @param stop_when scalar that serves as conversion criterion, 1e-3 as default
@@ -60,32 +62,38 @@ nph <- function(dates, ref_date = min(dates),
                 k_quantile = FALSE, h_quantile = FALSE,
                 k_length = 6, h_length = 6,
                 g_length = 6, stopwhen = 1e-3,
+                time_of_day = rep(0, length(dates)),
+                just_times = FALSE,
                 time_unit = "day", dist_unit = "mile"){
 
   # create times from dates
   df = data.frame(dates, lat, lon, marks)
   # put dates in correct format
-  if(class(dates) == "Date"){
-    dates_clean = dates
-  } else {
-    dates_clean = lubridate::mdy(dates)
-  }
-  # put refernce date in correct format
-  if(class(ref_date) == "Date") {
-    ref_date = ref_date
-  } else {
-    ref_date = lubridate::mdy(ref_date)
-  }
+  if (just_times == FALSE) {
+    if (class(dates) == "Date") {
+      dates_clean = dates
+    } else {
+      dates_clean = lubridate::mdy(dates)
+    }
+    # put refernce date in correct format
+    if (class(ref_date) == "Date") {
+      ref_date = ref_date
+    } else {
+      ref_date = lubridate::mdy(ref_date)
+    }
 
-  times = lubridate::time_length(lubridate::interval(ref_date, dates_clean), time_unit)
-  if (sum(time_of_day) == 0){
-    times = times + runif(length(times), 0, 1)
+    times = lubridate::time_length(lubridate::interval(ref_date, dates_clean), time_unit)
+    if (sum(time_of_day) == 0) {
+      times = times + runif(length(times), 0, 1)
+    } else {
+      times_clean = lubridate::hms(times)
+      h = lubridate::hour(times_clean) / 24
+      m = lubridate::minute(times_clean) / 1440
+      s = lubridate::second(times_clean) / 86400
+      times = times + h + m + s
+    }
   } else {
-    times_clean = lubridate::hms(times)
-    h = lubridate::hour(times_clean)/24
-    m = lubridate::minute(times_clean)/1440
-    s = lubridate::second(times_clean)/86400
-    times = times + h + m + s
+    times = dates
   }
 
   df$times = times
