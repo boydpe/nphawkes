@@ -25,12 +25,13 @@
 #' @param h_bins a vector of cutoff values for spatial bins of distance differences
 #' @param k_bins a vector of cutoff values for magnitude bins
 #' @param g_quantile FALSE by default to use defined temporal bins, TRUE to establish unifrom bins
-#' @param g_length a scalar to define the number of desired uniform temporal bins CHANGE THIS IN CODE
+#' @param g_length a scalar to define the number of desired uniform temporal bins
 #' @param h_quantile FALSE by default to use defined spatial bins, TRUE to establish uniform bins
-#' @param h_length a scalar to define the number of desired unifrom spatial bins CHANGE THIS
+#' @param h_length a scalar to define the number of desired unifrom spatial bins
 #' @param k_quantile FALSE by default to use defined magnitude bins, TRUE to establish unifrom bins
 #' @param k_length a scalar to define the number of desired magnitude bins
 #' @param ref_date a date to serve as time 0, defaults to earliest observation
+#' @param time_of_day character string that lists the time of day of events, as hour:minute:second
 #' @param time_unit character string that specifies the desired unit of time
 #' @param dist_unit character string that specifies the desired unit of distance: meter, kilometer, or mile
 #' @param stop_when scalar that serves as conversion criterion, 1e-3 as default
@@ -77,7 +78,16 @@ nph <- function(dates, ref_date = min(dates),
   }
 
   times = lubridate::time_length(lubridate::interval(ref_date, dates_clean), time_unit)
-  times = times + runif(length(times), 0, 1)
+  if (sum(time_of_day) == 0){
+    times = times + runif(length(times), 0, 1)
+  } else {
+    times_clean = lubridate::hms(times)
+    h = lubridate::hour(times_clean)/24
+    m = lubridate::minute(times_clean)/1440
+    s = lubridate::second(times_clean)/86400
+    times = times + h + m + s
+  }
+
   df$times = times
   df = df[order(df$times),]
   df = df[which(df$times > 0),]
@@ -129,14 +139,14 @@ nph <- function(dates, ref_date = min(dates),
   if(g_quantile == TRUE){
     time_mat[lower.tri(time_mat, diag = TRUE)] = NA
     g_bins = as.vector(quantile(time_mat, na.rm = TRUE,
-                                probs = seq(0,1, length.out= g_length)))
+                                probs = seq(0,1, length.out= g_length + 1)))
     g_bins[length(g_bins)] = g_bins[length(g_bins)] + 1
     g_bins[1] = 0
   } else {g_bins = g_bins}
 
   if(k_quantile == TRUE){
     k_bins = unique(as.vector(quantile(marks,
-                                       probs = seq(0, 1, length.out = k_length))))
+                                       probs = seq(0, 1, length.out = k_length + 1))))
     k_bins[length(k_bins)] = k_bins[length(k_bins)] + 1
     k_bins[1] = 0 # accounts for simulating points below lowest bin
   } else {k_bins = k_bins}
@@ -144,7 +154,7 @@ nph <- function(dates, ref_date = min(dates),
   if(h_quantile == TRUE){
     dist_mat[lower.tri(dist_mat, diag = TRUE)] = NA
     h_bins = as.vector(quantile(dist_mat, na.rm = TRUE,
-                                probs = seq(0,1, length.out= h_length)))
+                                probs = seq(0,1, length.out= h_length + 1)))
     h_bins[length(h_bins)] = h_bins[length(h_bins)] + 1
     h_bins[1] = 0
   } else {h_bins = h_bins}
