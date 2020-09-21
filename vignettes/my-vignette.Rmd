@@ -18,3 +18,36 @@ knitr::opts_chunk$set(
 library(nphawkes)
 ```
 
+```{r, include=FALSE}
+# Data Setup
+# quake = read.csv("~/OSU/MS/eq_test1.csv")
+# refd = "1/1/2010"
+# full_time = lubridate::mdy(refd) + lubridate::duration(quake$t, "days")
+# quake$date = lubridate::date(full_time)
+# quake$time = paste(lubridate::hour(full_time),lubridate::minute(full_time),round(lubridate::second(full_time)), sep=":")
+
+```
+
+In this document, we will demonstrate the use of the `nphawkes` package. We will use the `eq.RData` file, found in this package. 
+
+This file contains 471 simulated earthquakes and contains the location in latitude and longitude (in [0,1] $x$ [0,1] unit square), date, time of day, and magnitude ($m$) of each event. 
+
+```{r, echo=FALSE}
+quake = data("eq.RData")
+quake = data("eq")
+quake = data(eq)
+head(quake)
+```
+
+We will first employ the Model Independent Stochastic Declustering algorithm via the `nph()` function. This function must be executed at least in terms of a temporal Hawkes process, but it may also be analyzed as a spataio-temporal or marked spatio-temporal Hawkes process. Provided the given information (date, spatial location, and marks), we will use all three triggering components. 
+
+```{r}
+out = nph(dates = quake$date, lat = quake$lat, lon = quake$lon,
+          marks = quake$m, g_bins = c(0, 7, 31, 180, 365, 1000), 
+          h_quantile = TRUE, k_quantile = TRUE, 
+          time_unit = "day", time_of_day = quake$time)
+```
+
+
+
+

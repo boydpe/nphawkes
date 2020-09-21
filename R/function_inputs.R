@@ -28,3 +28,26 @@ g_length = 6
 stopwhen = 1e-3
 time_unit = "day"
 dist_unit = "mile"
+
+
+
+dates = quake$date
+lat = quake$lat
+lon = quake$lon
+marks = quake$m
+g_bins = c(0, 7, 31, 180, 365, 1000)
+h_quantile = TRUE
+k_quantile = TRUE
+time_unit = "day"
+ref_date = "2010-01-01"
+h_bins = c(0,1)
+k_bins = c(0,1)
+g_quantile = FALSE
+k_length = 6
+h_length = 6
+g_length = 6
+stopwhen = 1e-3
+time_of_day = quake$time
+just_times = FALSE
+dist_unit = "mile"
+

@@ -47,9 +47,9 @@
 #' @return \code{br} is the estimated background rate of the process
 #' @return \code{perc_diag} is the proportion of mass lying on the diagonal of matrix \code{p0}
 #' @return \code{time_bins} is a matrix containing the temporal bin of each pair of events
-#'  @return \code{dist_bins} is a matrix containing the spatial bin of each pair of events
-#'  @return \code{mark_bins} is a vector containing the magnitude bin of each event
-#'  @return \code{input} is a list of all inputs
+#' @return \code{dist_bins} is a matrix containing the spatial bin of each pair of events
+#' @return \code{mark_bins} is a vector containing the magnitude bin of each event
+#' @return \code{input} is a list of all inputs
 
 
 #' @export
@@ -62,7 +62,7 @@ nph <- function(dates, ref_date = min(dates),
                 k_quantile = FALSE, h_quantile = FALSE,
                 k_length = 6, h_length = 6,
                 g_length = 6, stopwhen = 1e-3,
-                time_of_day = rep(0, length(dates)),
+                time_of_day = NA,
                 just_times = FALSE,
                 time_unit = "day", dist_unit = "mile"){
 
@@ -79,14 +79,14 @@ nph <- function(dates, ref_date = min(dates),
     if (class(ref_date) == "Date") {
       ref_date = ref_date
     } else {
-      ref_date = lubridate::mdy(ref_date)
+      ref_date = lubridate::as_date(ref_date)
     }
 
     times = lubridate::time_length(lubridate::interval(ref_date, dates_clean), time_unit)
-    if (sum(time_of_day) == 0) {
+    if (is.na(time_of_day[1]) == TRUE) {
       times = times + runif(length(times), 0, 1)
     } else {
-      times_clean = lubridate::hms(times)
+      times_clean = lubridate::hms(time_of_day)
       h = lubridate::hour(times_clean) / 24
       m = lubridate::minute(times_clean) / 1440
       s = lubridate::second(times_clean) / 86400
@@ -109,30 +109,27 @@ nph <- function(dates, ref_date = min(dates),
 
   # establish time, space differences for each event
   time_mat = get_time(times)
-  get_dist1 = function(lat, lon){
 
-    n = length(lat)
-    dist_mat = matrix(data = NA, nrow = n, ncol = n)
-    R = 6371e3
+  n = length(lat)
+  dist_mat = matrix(data = NA, nrow = n, ncol = n)
+  R = 6371e3
 
-    for (i in 1:n){
-      for (j in 1:n){
-        phi1 = lat[i]*pi/180
-        phi2 = lat[j]*pi/180
-        latdiff = (lat[j] - lat[i])*pi/180
-        londiff = (lon[j] - lon[i])*pi/180
+  for (i in 1:n) {
+    for (j in 1:n) {
+      phi1 = lat[i] * pi / 180
+      phi2 = lat[j] * pi / 180
+      latdiff = (lat[j] - lat[i]) * pi / 180
+      londiff = (lon[j] - lon[i]) * pi / 180
 
-        a = sin(latdiff/2)*sin(latdiff/2) +
-          cos(phi1)*cos(phi2)*sin(londiff/2)*sin(londiff/2)
-        b = 2*atan2(sqrt(a), sqrt(1-a))
-        d = R*b
+      a = sin(latdiff / 2) * sin(latdiff / 2) +
+        cos(phi1) * cos(phi2) * sin(londiff / 2) * sin(londiff / 2)
+      b = 2 * atan2(sqrt(a), sqrt(1 - a))
+      d = R * b
 
-        dist_mat[i,j] = d
-      }
+      dist_mat[i, j] = d
     }
-    return(dist_mat)
   }
-  dist_mat = get_dist1(lat, lon)
+
 
   # convert distances to correct units
   if (dist_unit == "mile") {
@@ -145,8 +142,9 @@ nph <- function(dates, ref_date = min(dates),
 
   # implement option of bin by quantile
   if(g_quantile == TRUE){
-    time_mat[lower.tri(time_mat, diag = TRUE)] = NA
-    g_bins = as.vector(quantile(time_mat, na.rm = TRUE,
+    time_mat1 = time_mat
+    time_mat1[lower.tri(time_mat1, diag = TRUE)] = NA
+    g_bins = as.vector(quantile(time_mat1, na.rm = TRUE,
                                 probs = seq(0,1, length.out= g_length + 1)))
     g_bins[length(g_bins)] = g_bins[length(g_bins)] + 1
     g_bins[1] = 0
@@ -160,8 +158,9 @@ nph <- function(dates, ref_date = min(dates),
   } else {k_bins = k_bins}
 
   if(h_quantile == TRUE){
-    dist_mat[lower.tri(dist_mat, diag = TRUE)] = NA
-    h_bins = as.vector(quantile(dist_mat, na.rm = TRUE,
+    dist_mat1 = dist_mat
+    dist_mat1[lower.tri(dist_mat1, diag = TRUE)] = NA
+    h_bins = as.vector(quantile(dist_mat1, na.rm = TRUE,
                                 probs = seq(0,1, length.out= h_length + 1)))
     h_bins[length(h_bins)] = h_bins[length(h_bins)] + 1
     h_bins[1] = 0
@@ -320,6 +319,10 @@ cond_int = function(model) {
 #' @param method character string that defines residual analysis method as "superthin", "thin", or "superpose"
 #' @param map name of map provided by the maps package, defaults to maps::world
 #' @param region name of subregion to include, defaults to entirety of map
+#' @param sim_grid TRUE if geographical coordinates do not necessarily pertain to
+#' certain area, such as 0x1 by 0x1 grid, FALSE if using specific region or not using spatial information
+#' @param lat_bounds vector containing minimum and maximum latitude bounds if sim_grid is TRUE
+#' @param lon_bounds vector containing minimum and maximum longitude bounds if sim_gird is TRUE
 #'
 #' @return a data frame which includes the time, location, and estimted conditional intensity of events.
 #' The type of event, either observed or simulated, is noted along with the probability that the event was kept
@@ -327,7 +330,10 @@ cond_int = function(model) {
 #' @export
 super_thin = function(K = "median_ci",
                       model, method = "superthin",
-                      map = world, region = "."){
+                      map = world, region = ".",
+                      sim_grid = FALSE,
+                      lat_bounds = c(min(model$data$lat), max(model$data$lat)),
+                      lon_bounds = c(min(model$data$lon), max(model$data$lon))) {
 
   # FIRST: CI FOR DATA
   times = model$data$times
@@ -399,16 +405,22 @@ super_thin = function(K = "median_ci",
   rate = (round(mean(marks)) - min(marks))^(-1)
   sim_pp$marks = round(rexp(n2, rate)) + min(marks)
   # not actually using simulated marks - so no parametric assumptions
-  if(sum(model$lat) == 0){
-    sim_pp = cbind(sim_pp, lat = rep(0,n2), lon = rep(0,n2))
+  if (sum(model$lat) == 0) {
+    sim_pp = cbind(sim_pp, lat = rep(0, n2), lon = rep(0, n2))
   } else{
-    region = ggplot2::map_data(maps::map(), region = region)
-    region = region[,c('long', 'lat')] %>%
-      sp::Polygon() %>%
-      sp::spsample(n = n2, type = "random")
-    sim_lat = region$y
-    sim_lon = region$x
-    sim_pp = cbind(sim_pp, lat = sim_lat, lon = sim_lon)
+    if (sim_grid == TRUE) {
+      sim_lat = runif(n2, min = lat_bounds[1], max = lat_bounds[2])
+      sim_lon = runif(n2, min = lon_bounds[1], max = lat_bounds[2])
+      sim_pp = cbind(sim_pp, lat = sim_lat, lon = sim_lon)
+    } else {
+      region = ggplot2::map_data(maps::map(), region = region)
+      region = region[, c('long', 'lat')] %>%
+        sp::Polygon() %>%
+        sp::spsample(n = n2, type = "random")
+      sim_lat = region$y
+      sim_lon = region$x
+      sim_pp = cbind(sim_pp, lat = sim_lat, lon = sim_lon)
+    }
   }
 
   data_pp = data.frame(Time = times, marks = marks,
