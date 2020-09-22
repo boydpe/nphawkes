@@ -21,14 +21,14 @@
 #' @param lat a vector of latitudes, omit if not using spatial data
 #' @param lon a vector of longitudes, omit if not using spatial data
 #' @param marks a vecotr of marks, or magnitudes, omit if not using marked process
-#' @param g_bins a vector of cutoff values for temporal bins of time differences
-#' @param h_bins a vector of cutoff values for spatial bins of distance differences
-#' @param k_bins a vector of cutoff values for magnitude bins
-#' @param g_quantile FALSE by default to use defined temporal bins, TRUE to establish unifrom bins
+#' @param time_breaks a vector of cutoff values for temporal bins of time differences
+#' @param space_breaks a vector of cutoff values for spatial bins of distance differences
+#' @param mark_breaks a vector of cutoff values for magnitude bins
+#' @param time_quantile FALSE by default to use defined temporal bins, TRUE to establish unifrom bins
 #' @param g_length a scalar to define the number of desired uniform temporal bins
-#' @param h_quantile FALSE by default to use defined spatial bins, TRUE to establish uniform bins
+#' @param space_quantile FALSE by default to use defined spatial bins, TRUE to establish uniform bins
 #' @param h_length a scalar to define the number of desired unifrom spatial bins
-#' @param k_quantile FALSE by default to use defined magnitude bins, TRUE to establish unifrom bins
+#' @param mark_quantile FALSE by default to use defined magnitude bins, TRUE to establish unifrom bins
 #' @param k_length a scalar to define the number of desired magnitude bins
 #' @param ref_date a date to serve as time 0, defaults to earliest observation
 #' @param time_of_day character string that lists the time of day of events, as hour:minute:second
@@ -46,6 +46,8 @@
 #' @return \code{k} is a vector of the estimataed values for each bin of the magnitude triggering component
 #' @return \code{br} is the estimated background rate of the process
 #' @return \code{perc_diag} is the proportion of mass lying on the diagonal of matrix \code{p0}
+#' @return \code{perc_br} is the proportion of events in which the maximum probabilistic assignment
+#' is as a background event
 #' @return \code{time_bins} is a matrix containing the temporal bin of each pair of events
 #' @return \code{dist_bins} is a matrix containing the spatial bin of each pair of events
 #' @return \code{mark_bins} is a vector containing the magnitude bin of each event
@@ -57,9 +59,9 @@ nph <- function(dates, ref_date = min(dates),
                 lat = rep(0, length(dates)),
                 lon = rep(0, length(dates)),
                 marks = rep(0, length(dates)),
-                g_bins = c(0,1), h_bins = c(0,1),
-                k_bins = c(0,1), g_quantile = FALSE,
-                k_quantile = FALSE, h_quantile = FALSE,
+                time_breaks = c(0,1), space_breaks = c(0,1),
+                mark_breaks = c(0,1), time_quantile = FALSE,
+                mark_quantile = FALSE, space_quantile = FALSE,
                 k_length = 6, h_length = 6,
                 g_length = 6, stopwhen = 1e-3,
                 time_of_day = NA,
@@ -141,35 +143,35 @@ nph <- function(dates, ref_date = min(dates),
   }
 
   # implement option of bin by quantile
-  if(g_quantile == TRUE){
+  if(time_quantile == TRUE){
     time_mat1 = time_mat
     time_mat1[lower.tri(time_mat1, diag = TRUE)] = NA
-    g_bins = as.vector(quantile(time_mat1, na.rm = TRUE,
+    time_breaks = as.vector(quantile(time_mat1, na.rm = TRUE,
                                 probs = seq(0,1, length.out= g_length + 1)))
-    g_bins[length(g_bins)] = g_bins[length(g_bins)] + 1
-    g_bins[1] = 0
-  } else {g_bins = g_bins}
+    time_breaks[length(time_breaks)] = time_breaks[length(time_breaks)] + 1
+    time_breaks[1] = 0
+  } else {time_breaks = time_breaks}
 
-  if(k_quantile == TRUE){
-    k_bins = unique(as.vector(quantile(marks,
+  if(mark_quantile == TRUE){
+    mark_breaks = unique(as.vector(quantile(marks,
                                        probs = seq(0, 1, length.out = k_length + 1))))
-    k_bins[length(k_bins)] = k_bins[length(k_bins)] + 1
-    k_bins[1] = 0 # accounts for simulating points below lowest bin
-  } else {k_bins = k_bins}
+    mark_breaks[length(mark_breaks)] = mark_breaks[length(mark_breaks)] + 1
+    mark_breaks[1] = 0 # accounts for simulating points below lowest bin
+  } else {mark_breaks = mark_breaks}
 
-  if(h_quantile == TRUE){
+  if(space_quantile == TRUE){
     dist_mat1 = dist_mat
     dist_mat1[lower.tri(dist_mat1, diag = TRUE)] = NA
-    h_bins = as.vector(quantile(dist_mat1, na.rm = TRUE,
+    space_breaks = as.vector(quantile(dist_mat1, na.rm = TRUE,
                                 probs = seq(0,1, length.out= h_length + 1)))
-    h_bins[length(h_bins)] = h_bins[length(h_bins)] + 1
-    h_bins[1] = 0
-  } else {h_bins = h_bins}
+    space_breaks[length(space_breaks)] = space_breaks[length(space_breaks)] + 1
+    space_breaks[1] = 0
+  } else {space_breaks = space_breaks}
 
   # place time, dist, and marks in bins
-  time_bins = get_time_bins(time_mat, g_bins)
-  mark_mat = get_mark(marks, k_bins)
-  dist_bins = get_dist_bins(dist_mat, h_bins)
+  time_bins = get_time_bins(time_mat, time_breaks)
+  mark_mat = get_mark(marks, mark_breaks)
+  dist_bins = get_dist_bins(dist_mat, space_breaks)
 
   # calculate br and trig components
   # update matrix, check if converge
@@ -179,12 +181,12 @@ nph <- function(dates, ref_date = min(dates),
   # uu = 1
   while( max_diff > stopwhen){
     br = calc_br(p0, times)
-    g = get_g(p0, g_bins, time_mat)
-    h = get_h(p0, h_bins, dist_mat)
-    k = get_k(p0, marks, k_bins)
+    g = get_g(p0, time_breaks, time_mat)
+    h = get_h(p0, space_breaks, dist_mat)
+    k = get_k(p0, marks, mark_breaks)
     p = update_p(p0, time_mat, dist_mat, mark_mat,
                  g, h, k,
-                 h_bins, g_bins, k_bins,
+                 space_breaks, time_breaks, mark_breaks,
                  br, time_bins, dist_bins, lat)
     # print(p[1:5, 1:5])
     max_diff = check_p(p0, p)
@@ -203,7 +205,7 @@ nph <- function(dates, ref_date = min(dates),
     }
   }
 
-  area = diff(k_bins)*k
+  area = diff(mark_breaks)*k
   k_std = area / sum(area)
 
   perc_br = sum(max_event) / length(max_event)
@@ -212,7 +214,7 @@ nph <- function(dates, ref_date = min(dates),
   out = list(p0 = p0, g= g, h = h, k = k, br = br, k_std = k_std,
              time_bins = time_bins, mark_bins = mark_mat,
              dist_bins = dist_bins, perc_br = perc_br, perc_diag = perc_diag,
-             g_bins = g_bins, k_bins = k_bins, h_bins = h_bins, data = df,
+             time_breaks = time_breaks, mark_breaks = mark_breaks, space_breaks = space_breaks, data = df,
              ref_date = ref_date,
              input =   mget(names(formals()),sys.frame(sys.nframe())))
   # out = p0
@@ -239,9 +241,9 @@ cond_int = function(model) {
   lon = model$data$lon
 
   # binning function
-  g_bins = model$g_bins
-  h_bins = model$h_bins
-  k_bins = model$k_bins
+  time_breaks = model$time_breaks
+  space_breaks = model$space_breaks
+  mark_breaks = model$mark_breaks
 
   bin_f <- function(u, v) {
     x <- rep(0, length(u))
@@ -341,9 +343,9 @@ super_thin = function(K = "median_ci",
   lat = model$data$lat
   lon = model$data$lon
   # binning function
-  g_bins = model$g_bins
-  h_bins = model$h_bins
-  k_bins = model$k_bins
+  time_breaks = model$time_breaks
+  space_breaks = model$space_breaks
+  mark_breaks = model$mark_breaks
 
   bin_f <- function(u,v){
     x <- rep(0,length(u))
@@ -453,10 +455,10 @@ super_thin = function(K = "median_ci",
     for (j in 1:(sim_pp$row1[i])){# cut -1 from end
       td = sim_pp$Time[i] - data_pp$Time[j] # last bit was sim_data$row1[j]
       # change second to last obs time, need just obs data
-      gb = bin_f(td, g_bins)
+      gb = bin_f(td, time_breaks)
       gg = model$g[gb]
 
-      kb = bin_f(data_pp$marks[j], k_bins) # was all_data, changed to data_pp
+      kb = bin_f(data_pp$marks[j], mark_breaks) # was all_data, changed to data_pp
       kk = model$k[kb]
 
       #gk = gg*kk
@@ -464,7 +466,7 @@ super_thin = function(K = "median_ci",
 
       hd = (sim_pp$lat[i] - data_pp$lat[j])^2 +
         (sim_pp$lon[i] - data_pp$lon[j])^2
-      hb = bin_f(hd, h_bins)
+      hb = bin_f(hd, space_breaks)
       hh = model$h[hb]
 
       ghk = gg*kk*hh
@@ -519,9 +521,9 @@ super_thin = function(K = "median_ci",
 #' @export
 se_bars = function(model){
 
-  g_bins = model$g_bins
-  h_bins = model$h_bins
-  k_bins = model$k_bins
+  time_breaks = model$time_breaks
+  space_breaks = model$space_breaks
+  mark_breaks = model$mark_breaks
 
   nt = sum(model$p0) - sum(diag(model$p0))
   thetag = rep(0, length(model$g))
@@ -538,7 +540,7 @@ se_bars = function(model){
   }
 
   thetag = thetag / nt
-  varg = thetag*(1 - thetag)/ (nt*(diff(g_bins))^2)
+  varg = thetag*(1 - thetag)/ (nt*(diff(time_breaks))^2)
 
   # magnitude standard error
   for(i in 2: nrow(model$p0)){
@@ -556,12 +558,12 @@ se_bars = function(model){
     for(j in 1:(i-1)){
       x_h = model$dist_bins[j,i] + 1
       #should it  be + 1?
-      thetag[x_h] = thetag[x_h] + model$p0[i,j]
+      thetah[x_h] = thetah[x_h] + model$p0[i,j]
     }
   }
 
   thetah = thetah / nt
-  varh = thetah*(1 - thetah)/ (nt*(diff(h_bins))^2)
+  varh = thetah*(1 - thetah)/ (nt*(diff(space_breaks))^2)
 
   out = list(varg = varg, vark = vark, varh = varh)
   return(out)
@@ -585,34 +587,34 @@ se_bars = function(model){
 #'
 #' @return histogram estimaotrs for all utilized triggering components
 #' @export
-trig_plots = function(model, g_max = max(model$g_bins),
-                      k_max = max(model$k_bins),
-                      k_min = min(model$k_bins),
-                      h_max = max(model$h_bins),
+trig_plots = function(model, g_max = max(model$time_breaks),
+                      k_max = max(model$mark_breaks),
+                      k_min = min(model$mark_breaks),
+                      h_max = max(model$space_breaks),
                       mag_label = "magnitude"){
 
-  g_bins = model$g_bins
-  n1 = length(g_bins)
-  k_bins = model$k_bins
-  n2 = length(k_bins)
-  h_bins = model$h_bins
-  n3 = length(h_bins)
+  time_breaks = model$time_breaks
+  n1 = length(time_breaks)
+  mark_breaks = model$mark_breaks
+  n2 = length(mark_breaks)
+  space_breaks = model$space_breaks
+  n3 = length(space_breaks)
 
   ser = se_bars(model)
   se_g = sqrt(ser$varg)
   se_k = sqrt(ser$vark)
   se_h = sqrt(ser$varh)
   time_df = data.frame(g = c(model$g, model$g[length(model$g)]),
-                       time = g_bins,
+                       time = time_breaks,
                        se = c(se_g, se_g[length(se_g)]))
   #time_df = time_df[-nrow(time_df),] may actually need this one
 
   mag_df = data.frame(k = c(model$k, model$k[length(model$k)]),
-                      magnitude = k_bins,
+                      magnitude = mark_breaks,
                       se = c(se_k, se_k[length(se_k)]))
 
   dist_df = data.frame(h = c(model$h, model$h[length(model$h)]),
-                        dist = h_bins,
+                        dist = space_breaks,
                        se = c(se_h, se_h[length(se_h)]))
 
   # Time Plot
@@ -635,7 +637,7 @@ trig_plots = function(model, g_max = max(model$g_bins),
   }
 
   trig_g = trig_g + ggplot2::geom_step(ggplot2::aes(group=1)) +
-    ggplot2::scale_x_continuous(breaks = model$g_bins) +
+    ggplot2::scale_x_continuous(breaks = round(model$time_breaks, 1)) +
     ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
                shape = 21,
                data = data.frame(
@@ -667,7 +669,8 @@ trig_plots = function(model, g_max = max(model$g_bins),
 
   trig_k = trig_k + ggplot2::geom_step(ggplot2::aes(group=1)) +
     ggplot2::scale_x_continuous(breaks =
-                         c(min(model$input$marks), model$k_bins[-1])) +
+                         c(round(min(model$input$marks),1),
+                           round(model$mark_breaks[-1],1))) +
     ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
                shape = 21,
                data = data.frame(
@@ -682,7 +685,7 @@ trig_plots = function(model, g_max = max(model$g_bins),
   #Space Plot
   if(sum(model$dist_bins) != 0) {
 
-  trig_h = ggplot2::ggplot(dist_df, ggplot2::aes(dist, g)) +
+  trig_h = ggplot2::ggplot(dist_df, ggplot2::aes(dist, h)) +
     ggplot2::coord_cartesian(xlim = c(0, h_max)) +
     ggplot2::xlab(paste("s (distance in ", model$input$dist_unit, "s)", sep = "")) +
     ggplot2::ylab("h(s)")
@@ -700,7 +703,7 @@ trig_plots = function(model, g_max = max(model$g_bins),
   }
 
   trig_h = trig_h + ggplot2::geom_step(ggplot2::aes(group=1)) +
-    ggplot2::scale_x_continuous(breaks = model$h_bins) +
+    ggplot2::scale_x_continuous(breaks = round(model$space_breaks, 1)) +
     ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
                shape = 21,
                data = data.frame(

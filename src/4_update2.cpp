@@ -5,8 +5,8 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix dist_mat,
                        NumericVector mark_mat, NumericVector g, NumericVector h,
-                       NumericVector k, NumericVector h_bins, NumericVector g_bins,
-                       NumericVector k_bins, double br, NumericMatrix time_bins,
+                       NumericVector k, NumericVector space_breaks, NumericVector time_breaks,
+                       NumericVector mark_breaks, double br, NumericMatrix time_bins,
                        NumericMatrix dist_bins, NumericVector lat){
 
   int n_i = pow(p0.size(), 0.5);

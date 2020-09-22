@@ -5,16 +5,16 @@ bins <- function(u, v) {
     .Call('_nphawkes_bins', PACKAGE = 'nphawkes', u, v)
 }
 
-get_dist_bins <- function(dist_mat, h_bins) {
-    .Call('_nphawkes_get_dist_bins', PACKAGE = 'nphawkes', dist_mat, h_bins)
+get_dist_bins <- function(dist_mat, space_breaks) {
+    .Call('_nphawkes_get_dist_bins', PACKAGE = 'nphawkes', dist_mat, space_breaks)
 }
 
-get_mark <- function(marks, k_bins) {
-    .Call('_nphawkes_get_mark', PACKAGE = 'nphawkes', marks, k_bins)
+get_mark <- function(marks, mark_breaks) {
+    .Call('_nphawkes_get_mark', PACKAGE = 'nphawkes', marks, mark_breaks)
 }
 
-get_time_bins <- function(time_mat, g_bins) {
-    .Call('_nphawkes_get_time_bins', PACKAGE = 'nphawkes', time_mat, g_bins)
+get_time_bins <- function(time_mat, time_breaks) {
+    .Call('_nphawkes_get_time_bins', PACKAGE = 'nphawkes', time_mat, time_breaks)
 }
 
 get_time <- function(times) {
@@ -29,20 +29,20 @@ calc_br <- function(p0, times) {
     .Call('_nphawkes_calc_br', PACKAGE = 'nphawkes', p0, times)
 }
 
-get_k <- function(p0, marks, k_bins) {
-    .Call('_nphawkes_get_k', PACKAGE = 'nphawkes', p0, marks, k_bins)
+get_k <- function(p0, marks, mark_breaks) {
+    .Call('_nphawkes_get_k', PACKAGE = 'nphawkes', p0, marks, mark_breaks)
 }
 
-get_h <- function(p0, h_bins, dist_mat) {
-    .Call('_nphawkes_get_h', PACKAGE = 'nphawkes', p0, h_bins, dist_mat)
+get_h <- function(p0, space_breaks, dist_mat) {
+    .Call('_nphawkes_get_h', PACKAGE = 'nphawkes', p0, space_breaks, dist_mat)
 }
 
-get_g <- function(p0, g_bins, time_mat) {
-    .Call('_nphawkes_get_g', PACKAGE = 'nphawkes', p0, g_bins, time_mat)
+get_g <- function(p0, time_breaks, time_mat) {
+    .Call('_nphawkes_get_g', PACKAGE = 'nphawkes', p0, time_breaks, time_mat)
 }
 
-update_p <- function(p0, time_mat, dist_mat, mark_mat, g, h, k, h_bins, g_bins, k_bins, br, time_bins, dist_bins, lat) {
-    .Call('_nphawkes_update_p', PACKAGE = 'nphawkes', p0, time_mat, dist_mat, mark_mat, g, h, k, h_bins, g_bins, k_bins, br, time_bins, dist_bins, lat)
+update_p <- function(p0, time_mat, dist_mat, mark_mat, g, h, k, space_breaks, time_breaks, mark_breaks, br, time_bins, dist_bins, lat) {
+    .Call('_nphawkes_update_p', PACKAGE = 'nphawkes', p0, time_mat, dist_mat, mark_mat, g, h, k, space_breaks, time_breaks, mark_breaks, br, time_bins, dist_bins, lat)
 }
 
 check_p <- function(p0, p) {

@@ -2,14 +2,14 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-NumericVector get_k(NumericMatrix p0, NumericVector marks, NumericVector k_bins) {
-  
+NumericVector get_k(NumericMatrix p0, NumericVector marks, NumericVector mark_breaks) {
+
   // PRELIMINARIES
   // Get the number of columns in p0
   // int n = p0.ncol(); // was .ncol()
   int n = pow(p0.size(), 0.5);
   // Get the number of bins
-  int n_bins = k_bins.size() - 1; // was k_bins.size 
+  int n_bins = mark_breaks.size() - 1; // was mark_breaks.size
   // Create the vector for the numerator
   NumericVector k_num(n_bins);
   // Create the vector for the denominator
@@ -18,10 +18,10 @@ NumericVector get_k(NumericMatrix p0, NumericVector marks, NumericVector k_bins)
   NumericVector k(n_bins);
   // Create mark_bin as an integer valued object
   double mark_bin;
-  
+
   // WORKING PORTION OF THE CODE
   // Start with column j and iterate
-  
+
   // double mark_sum = sum(marks);
   // double mark_sum = std::accumulate(marks.begin(),
   //                    marks.end(), 0.0);
@@ -34,7 +34,7 @@ NumericVector get_k(NumericMatrix p0, NumericVector marks, NumericVector k_bins)
 
       // search for the bin the j-th mark is in
       for (int i = 0; i < n_bins; i++) {
-        if (marks[j] > k_bins[i] && marks[j] <= k_bins[i + 1]) {
+        if (marks[j] > mark_breaks[i] && marks[j] <= mark_breaks[i + 1]) {
           mark_bin = i;
         }
       }
