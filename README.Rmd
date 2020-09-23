@@ -98,7 +98,7 @@ out$br
 out$perc_diag
 ```
 
-We can then inspect histogram estimators of the triggering functions. 
+We can then inspect histogram estimators of the triggering functions. The triggering plots include standard error estimates, which can be separately calculated using `se_bars(model)`. 
 
 ```{r}
 trig_plots(model = out4, g_max = 32,
@@ -113,11 +113,26 @@ ci = cond_int(model = out)
 head(ci)
 ```
 
-We can perfrom super-thinning as a residual method, thinning events in areas of high conditional intenstiy and superpositioning events in areas of low intensity. We'll use the median value of the conditional intensity as the threshhold value. We'll use the `sim_grid = TRUE` argument since the geographical coordinates are simulated within the $[0\times1]\times[0\times1]$ grid. 
+We can perfrom super-thinning as a residual method, thinning events in areas of high conditional intenstiy and superpositioning events in areas of low intensity. We'll use the median value of the conditional intensity as the threshhold value. We'll use the `sim_grid = TRUE` argument since the geographical coordinates are simulated within the $`[0\times1]\times[0\times1]`$ grid. 
  
 
 ```{r}
 st = super_thin(K = "median_ci", model = out,
                 method = "superthin", sim_grid = TRUE)
+head(st)
 ```
+
+After super-thinning, we can view a histogram of the residual process to assess the resulting distribution.
+
+```{r}
+ci_hist(st)
+```
+
+Finally, we can inspect a plot that shows where events are superposed and where events are thinned. This tiered plot shows, over time, events that were not thinned (retained), superposed events, and thinned events. 
+
+```{r}
+st_plot(st)
+```
+
+
 

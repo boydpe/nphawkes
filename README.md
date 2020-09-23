@@ -112,6 +112,8 @@ out$perc_diag
 ```
 
 We can then inspect histogram estimators of the triggering functions.
+The triggering plots include standard error estimates, which can be
+separately calculated using `se_bars(model)`.
 
 ``` r
 trig_plots(model = out4, g_max = 32,
@@ -146,9 +148,43 @@ areas of high conditional intenstiy and superpositioning events in areas
 of low intensity. We’ll use the median value of the conditional
 intensity as the threshhold value. We’ll use the `sim_grid = TRUE`
 argument since the geographical coordinates are simulated within the
-\([0\times1]\times[0\times1]\) grid.
+\(`[0\times1]\times[0\times1]`\) grid.
 
 ``` r
 st = super_thin(K = "median_ci", model = out,
                 method = "superthin", sim_grid = TRUE)
+head(st)
+#>       times         lat       lon    marks  cond_int       Date         p keep
+#> 1  8.966238 0.698142489 0.6944789 3.756671 0.4756867 2010-01-09 0.9901461    1
+#> 2 10.223218 0.686690810 0.6834387 3.569237 0.4709993 2010-01-11 1.0000000    1
+#> 3 12.579884 0.674706658 0.7150710 3.038466 0.4709993 2010-01-13 1.0000000    1
+#> 4 19.361111 0.629251374 0.9108068 3.672588 0.4709993 2010-01-20 1.0000000    1
+#> 5 23.427431 0.002338193 0.4389249 3.047991 0.4709993 2010-01-24 1.0000000    1
+#> 6 29.829606 0.120843447 0.3801922 3.042964 0.4709993 2010-01-30 1.0000000    1
+#>     type
+#> 1 retain
+#> 2 retain
+#> 3 retain
+#> 4 retain
+#> 5 retain
+#> 6 retain
 ```
+
+After super-thinning, we can view a histogram of the residual process to
+assess the resulting distribution.
+
+``` r
+ci_hist(st)
+```
+
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+
+Finally, we can inspect a plot that shows where events are superposed
+and where events are thinned. This tiered plot shows, over time, events
+that were not thinned (retained), superposed events, and thinned events.
+
+``` r
+st_plot(st)
+```
+
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
