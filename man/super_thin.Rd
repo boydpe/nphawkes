@@ -9,7 +9,10 @@ super_thin(
   model,
   method = "superthin",
   map = world,
-  region = "."
+  region = ".",
+  sim_grid = FALSE,
+  lat_bounds = c(min(model$data$lat), max(model$data$lat)),
+  lon_bounds = c(min(model$data$lon), max(model$data$lon))
 )
 }
 \arguments{
@@ -24,6 +27,13 @@ superposing that is implemented. Can be a constant value, the median, mean, mini
 \item{map}{name of map provided by the maps package, defaults to maps::world}
 
 \item{region}{name of subregion to include, defaults to entirety of map}
+
+\item{sim_grid}{TRUE if geographical coordinates do not necessarily pertain to
+certain area, such as 0x1 by 0x1 grid, FALSE if using specific region or not using spatial information}
+
+\item{lat_bounds}{vector containing minimum and maximum latitude bounds if sim_grid is TRUE}
+
+\item{lon_bounds}{vector containing minimum and maximum longitude bounds if sim_gird is TRUE}
 }
 \value{
 a data frame which includes the time, location, and estimted conditional intensity of events.

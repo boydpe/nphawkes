@@ -404,7 +404,7 @@ super_thin = function(K = "median_ci",
   sim_time = sort(runif(N, M1, M2))
   sim_pp = data.frame(Time = sim_time, Obs = rep(0, N), marks = rep(NA, N))
   n2 = nrow(sim_pp)
-  rate = (round(mean(marks)) - min(marks))^(-1)
+  rate = (mean(marks) - min(marks))^(-1)
   sim_pp$marks = round(rexp(n2, rate)) + min(marks)
   # not actually using simulated marks - so no parametric assumptions
   if (sum(model$lat) == 0) {
@@ -421,7 +421,7 @@ super_thin = function(K = "median_ci",
         sp::spsample(n = n2, type = "random")
       sim_lat = region$y
       sim_lon = region$x
-      sim_pp = cbind(sim_pp, lat = sim_lat, lon = sim_lon)
+      sim_pp = as.data.frame(cbind(sim_pp, lat = sim_lat, lon = sim_lon))
     }
   }
 

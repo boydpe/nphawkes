@@ -10,22 +10,24 @@ nph(
   lat = rep(0, length(dates)),
   lon = rep(0, length(dates)),
   marks = rep(0, length(dates)),
-  g_bins = c(0, 1),
-  h_bins = c(0, 1),
-  k_bins = c(0, 1),
-  g_quantile = FALSE,
-  k_quantile = FALSE,
-  h_quantile = FALSE,
+  time_breaks = c(0, 1),
+  space_breaks = c(0, 1),
+  mark_breaks = c(0, 1),
+  time_quantile = FALSE,
+  mark_quantile = FALSE,
+  space_quantile = FALSE,
   k_length = 6,
   h_length = 6,
   g_length = 6,
   stopwhen = 0.001,
+  time_of_day = NA,
+  just_times = FALSE,
   time_unit = "day",
   dist_unit = "mile"
 )
 }
 \arguments{
-\item{dates}{a vector of dates, as LIST DATE FORMATS ALLOWED}
+\item{dates}{a vector of dates, or times since initial event, as LIST DATE FORMATS ALLOWED}
 
 \item{ref_date}{a date to serve as time 0, defaults to earliest observation}
 
@@ -35,27 +37,32 @@ nph(
 
 \item{marks}{a vecotr of marks, or magnitudes, omit if not using marked process}
 
-\item{g_bins}{a vector of cutoff values for temporal bins of time differences}
+\item{time_breaks}{a vector of cutoff values for temporal bins of time differences}
 
-\item{h_bins}{a vector of cutoff values for spatial bins of distance differences}
+\item{space_breaks}{a vector of cutoff values for spatial bins of distance differences}
 
-\item{k_bins}{a vector of cutoff values for magnitude bins}
+\item{mark_breaks}{a vector of cutoff values for magnitude bins}
 
-\item{g_quantile}{FALSE by default to use defined temporal bins, TRUE to establish unifrom bins}
+\item{time_quantile}{FALSE by default to use defined temporal bins, TRUE to establish unifrom bins}
 
-\item{k_quantile}{FALSE by default to use defined magnitude bins, TRUE to establish unifrom bins}
+\item{mark_quantile}{FALSE by default to use defined magnitude bins, TRUE to establish unifrom bins}
 
-\item{h_quantile}{FALSE by default to use defined spatial bins, TRUE to establish uniform bins}
+\item{space_quantile}{FALSE by default to use defined spatial bins, TRUE to establish uniform bins}
 
 \item{k_length}{a scalar to define the number of desired magnitude bins}
 
-\item{h_length}{a scalar to define the number of desired unifrom spatial bins CHANGE THIS}
+\item{h_length}{a scalar to define the number of desired unifrom spatial bins}
 
-\item{g_length}{a scalar to define the number of desired uniform temporal bins CHANGE THIS IN CODE}
+\item{g_length}{a scalar to define the number of desired uniform temporal bins}
+
+\item{time_of_day}{character string that lists the time of day of events, as hour:minute:second}
 
 \item{time_unit}{character string that specifies the desired unit of time}
 
 \item{dist_unit}{character string that specifies the desired unit of distance: meter, kilometer, or mile}
+
+\item{just_time}{TRUE or FALSE object. TRUE if \code{dates} object is a vector of only times,
+indicating time elapsed since start time}
 
 \item{stop_when}{scalar that serves as conversion criterion, 1e-3 as default}
 }
@@ -74,10 +81,16 @@ represent the probability that event \code{i} is a background event.
 
 \code{perc_diag} is the proportion of mass lying on the diagonal of matrix \code{p0}
 
+\code{perc_br} is the proportion of events in which the maximum probabilistic assignment
+is as a background event
+
 \code{time_bins} is a matrix containing the temporal bin of each pair of events
- @return \code{dist_bins} is a matrix containing the spatial bin of each pair of events
- @return \code{mark_bins} is a vector containing the magnitude bin of each event
- @return \code{input} is a list of all inputs
+
+\code{dist_bins} is a matrix containing the spatial bin of each pair of events
+
+\code{mark_bins} is a vector containing the magnitude bin of each event
+
+\code{input} is a list of all inputs
 }
 \description{
 This function uses nonparametric procedures to analyze a Hawkes

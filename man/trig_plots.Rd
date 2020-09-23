@@ -6,10 +6,10 @@
 \usage{
 trig_plots(
   model,
-  g_max = max(model$g_bins),
-  k_max = max(model$k_bins),
-  k_min = min(model$k_bins),
-  h_max = max(model$h_bins),
+  g_max = max(model$time_breaks),
+  k_max = max(model$mark_breaks),
+  k_min = min(model$mark_breaks),
+  h_max = max(model$space_breaks),
   mag_label = "magnitude"
 )
 }
