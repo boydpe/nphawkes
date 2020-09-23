@@ -660,8 +660,8 @@ trig_plots = function(model, g_max = max(model$time_breaks),
                                    data = data.frame(
                                      x = c(mag_df$magnitude[i], mag_df$magnitude[i+1],
                                            mag_df$magnitude[i+1], mag_df$magnitude[i]),
-                                     y = c(mag_df$k[i] - 2*mag_df$se[i],
-                                           mag_df$k[i] - 2*mag_df$se[i],
+                                     y = c(max(mag_df$k[i] - 2*mag_df$se[i], 0),
+                                           max(mag_df$k[i] - 2*mag_df$se[i], 0),
                                            mag_df$k[i] + 2*mag_df$se[i],
                                            mag_df$k[i] + 2*mag_df$se[i])),
                                    fill = "grey")
@@ -709,7 +709,7 @@ trig_plots = function(model, g_max = max(model$time_breaks),
                data = data.frame(
                  x = sort(rep(dist_df$dist, 2))[-c(1,2,2*n3 -1 ,2*n3)],
                  y = c(rep(dist_df$h[1:(n3-2)], each = 2)[-1], dist_df$h[n3]),
-                 type = c(rep(c("a", "b"), times = (n1-2)*2))
+                 type = c(rep(c("a", "b"), times = (n3-2)*2))
                )) +
     ggplot2::scale_fill_manual(values = c("black", "white")) +
     ggplot2::theme(legend.position = "none")
