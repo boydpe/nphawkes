@@ -20,7 +20,8 @@ Imports:
     ggplot2,
     dplyr, 
     maps,
-    sp
+    sp,
+    magrittr
 RoxygenNote: 7.1.1
 LinkingTo: Rcpp
 VignetteBuilder: knitr

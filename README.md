@@ -179,6 +179,13 @@ ci_hist(st)
 
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
 
+We can view the conditional intensity of the process, plotted against
+the frequency of events. The conditional intensity is
+
+``` r
+#ci_plot(model = out, superthin = st)
+```
+
 Finally, we can inspect a plot that shows where events are superposed
 and where events are thinned. This tiered plot shows, over time, events
 that were not thinned (retained), superposed events, and thinned events.
@@ -187,4 +194,4 @@ that were not thinned (retained), superposed events, and thinned events.
 st_plot(st)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
