@@ -17,7 +17,7 @@
 #' process in temporal or spatio-temporal domain, with or without marks.
 #'
 #'
-#' @param dates a vector of dates, or times since initial event, as LIST DATE FORMATS ALLOWED
+#' @param dates a vector of dates as "yyyy-mm-dd".
 #' @param lat a vector of latitudes, omit if not using spatial data
 #' @param lon a vector of longitudes, omit if not using spatial data
 #' @param marks a vecotr of marks, or magnitudes, omit if not using marked process
@@ -33,7 +33,7 @@
 #' @param ref_date a date to serve as time 0, defaults to earliest observation
 #' @param time_of_day character string that lists the time of day of events, as hour:minute:second
 #' @param just_time TRUE or FALSE object. TRUE if \code{dates} object is a vector of only times,
-#' indicating time elapsed since start time
+#' indicating time elapsed since beginning of catalog.
 #' @param time_unit character string that specifies the desired unit of time
 #' @param dist_unit character string that specifies the desired unit of distance: meter, kilometer, or mile
 #' @param stop_when scalar that serves as conversion criterion, 1e-3 as default
@@ -75,9 +75,9 @@ nph <- function(dates, ref_date = min(dates),
     if (class(dates) == "Date") {
       dates_clean = dates
     } else {
-      dates_clean = lubridate::mdy(dates)
+      dates_clean = lubridate::as_date(dates)
     }
-    # put refernce date in correct format
+    # put reference date in correct format
     if (class(ref_date) == "Date") {
       ref_date = ref_date
     } else {
