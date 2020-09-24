@@ -118,9 +118,9 @@ head(st)
 #> 1     8.966238   0   0 3.756671 0.2300374 2010-01-09 1.0000000    1 retain
 #> 2    10.223218   0   0 3.569237 0.7084398 2010-01-11 0.6534822    1 retain
 #> 3    12.579884   0   0 3.038466 0.3536702 2010-01-13 1.0000000    1 retain
+#> 1100 17.845554   1   0 3.000474 0.2404118 2010-01-18 0.4806991    1    sim
 #> 4    19.361111   0   0 3.672588 0.2528203 2010-01-20 1.0000000    1 retain
 #> 5    23.427431   0   0 3.047991 0.3293583 2010-01-24 1.0000000    1 retain
-#> 1010 28.054566   1   0 3.000474 0.2773382 2010-01-29 0.4009364    1    sim
 ```
 
 After super-thinning, we can view a histogram of the residual process to
@@ -136,8 +136,11 @@ We can view the conditional intensity of the process, plotted against
 the frequency of events. The conditional intensity is
 
 ``` r
-#ci_plot(model = out, superthin = st)
+ci_plot(model = out, superthin = st)
+#> Joining, by = "Date"
 ```
+
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
 Finally, we can inspect a plot that shows where events are superposed
 and where events are thinned. This tiered plot shows, over time, events

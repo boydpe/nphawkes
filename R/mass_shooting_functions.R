@@ -849,12 +849,11 @@ ci_plot = function(model, min_date = model$input$ref_date,
                    superthin){
 
   df = model$data
-  df$dates = lubridate::mdy(df$dates)
   df$Year = lubridate::year(df$dates)
   df$Month = lubridate::month(df$dates)
 
   min = as.Date(min_date)
-  max = lubridate::mdy(max_date)
+  max = as.Date(max_date)
 
   df_counts  = df %>% dplyr::group_by(Year, Month) %>%
     dplyr::summarize(n = dplyr::n(), Day = 1) %>%
