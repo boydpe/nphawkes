@@ -579,10 +579,12 @@ se_bars = function(model){
 #' estimated value of triggering functions for each bin along with \pm 2 standard errors bars
 #'
 #' @param model the output from \code{nph()}
-#' @param g_max the maximum x axis value shown in the temporal plot
-#' @param h_max the maximum x axis value shown in the spatial plot
-#' @param k_min the minimum x axis value shown in the magnitude plot
-#' @param k_max the maximum x axis value shown in the magnitude plot
+#' @param g_xlim vector of minimum and maximum x-axis value shown in the temporal plot
+#' @param h_xlim vector of minimum and maximum x-axis value shown in the spatial plot
+#' @param k_xlim vector of minimum and maximum x-axis value shown in the magnitude plot
+#' @param g_ylim vector of minimum and maximum y-axis value shown in the temporal plot
+#' @param h_ylim vector of minimum and maximum y-axis value shown in the spatial plot
+#' @param k_ylim vector of minimum and maximum y-axis value shown in the magnitude plot
 #' @param mag_label character string representing what the magnitude measures
 #'
 #' @return histogram estimaotrs for all utilized triggering components
