@@ -55,7 +55,7 @@ out = nph(dates = quake$date, ref_date = "2010-01-01",
           lat = quake$lat,
           lon = quake$lon,
           time_breaks = t1,
-          space_breaks = s4,
+          space_breaks = s2,
           space_quantile = FALSE,
           time_quantile = FALSE,
           mark_quantile = TRUE,
@@ -75,8 +75,9 @@ out$perc_diag
 We can then inspect histogram estimators of the triggering functions. The triggering plots include standard error estimates, which can be separately calculated using `se_bars(model)`. 
 
 ```{r}
-trig_plots(model = out, g_max = 32,
-           k_max = 4, k_min = 3)
+trig_plots(model = out, 
+           g_xlim = c(0,32),
+           k_xlim = c(3,4))
 ```
 
 We'll now calculate the conditional intensity of the process. 
