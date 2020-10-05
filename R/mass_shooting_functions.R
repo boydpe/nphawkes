@@ -77,13 +77,15 @@ nph <- function(dates, ref_date = min(dates),
     } else {
       dates_clean = lubridate::as_date(dates)
     }
+
     # put reference date in correct format
     # if (class(ref_date) == "Date") {
     #   ref_date = ref_date
     # } else {
     #   ref_date = lubridate::as_date(ref_date)
     # }
-    ref_date = as.Date(ref_date, format = "%m-%d-%Y")
+    #ref_date = as.Date(ref_date, format = "%m-%d-%Y")
+    ref_date = lubridate::as_date(ref_date)
 
     times = lubridate::time_length(lubridate::interval(ref_date, dates_clean), time_unit)
     if (is.na(time_of_day[1]) == TRUE) {
@@ -585,10 +587,13 @@ se_bars = function(model){
 #'
 #' @return histogram estimaotrs for all utilized triggering components
 #' @export
-trig_plots = function(model, g_max = max(model$time_breaks),
-                      k_max = max(model$mark_breaks),
-                      k_min = min(model$mark_breaks),
-                      h_max = max(model$space_breaks),
+trig_plots = function(model,
+                      g_xlim = c(min(model$time_breaks), max(model$time_breaks)),
+                      h_xlim = c(min(model$space_breaks), max(model$space_breaks)),
+                      k_xlim = c(min(model$mark_breaks), max(model$mark_breaks)),
+                      g_ylim = c(0,NA)
+                      h_ylim = c(0,NA)
+                      k_ylim = c(0,NA)
                       mag_label = "magnitude"){
 
   time_breaks = model$time_breaks
@@ -605,7 +610,6 @@ trig_plots = function(model, g_max = max(model$time_breaks),
   time_df = data.frame(g = c(model$g, model$g[length(model$g)]),
                        time = time_breaks,
                        se = c(se_g, se_g[length(se_g)]))
-  #time_df = time_df[-nrow(time_df),] may actually need this one
 
   mag_df = data.frame(k = c(model$k, model$k[length(model$k)]),
                       magnitude = mark_breaks,
@@ -615,9 +619,14 @@ trig_plots = function(model, g_max = max(model$time_breaks),
                         dist = space_breaks,
                        se = c(se_h, se_h[length(se_h)]))
 
+  g_ylim[2] = ifelse(is.na(g_ylim[2]), max(time_df$g + time_df$se, g_ylim[2]))
+  h_ylim[2] = ifelse(is.na(h_ylim[2]), max(dist_df$h + dist_df$se, h_ylim[2]))
+  k_ylim[2] = ifelse(is.na(k_ylim[2]), max(mag_df$k + mag_df$se, k_ylim[2]))
+
+
   # Time Plot
   trig_g = ggplot2::ggplot(time_df, ggplot2::aes(time, g)) +
-    ggplot2::coord_cartesian(xlim = c(0, g_max)) +
+    ggplot2::coord_cartesian(xlim = g_xlim, ylim = g_ylim) +
     ggplot2::xlab(paste("t (time in ", model$input$time_unit, "s)", sep = "")) +
     ggplot2::ylab("g(t)")
 
@@ -649,7 +658,7 @@ trig_plots = function(model, g_max = max(model$time_breaks),
   # Magnitude Plot
   if (sum(model$mark_bins) != 0){
   trig_k = ggplot2::ggplot(mag_df, ggplot2::aes(magnitude, k)) +
-    ggplot2::coord_cartesian(xlim = c(k_min, k_max)) +
+    ggplot2::coord_cartesian(xlim = k_xlim, ylim = k_ylim) +
     ggplot2::xlab(paste("m (", mag_label, ")", sep = "")) +
     ggplot2::ylab("k(m)")
 
@@ -684,7 +693,7 @@ trig_plots = function(model, g_max = max(model$time_breaks),
   if(sum(model$dist_bins) != 0) {
 
   trig_h = ggplot2::ggplot(dist_df, ggplot2::aes(dist, h)) +
-    ggplot2::coord_cartesian(xlim = c(0, h_max)) +
+    ggplot2::coord_cartesian(xlim = h_xlim, ylim = h_ylim) +
     ggplot2::xlab(paste("s (distance in ", model$input$dist_unit, "s)", sep = "")) +
     ggplot2::ylab("h(s)")
 
