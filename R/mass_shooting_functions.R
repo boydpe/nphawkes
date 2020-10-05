@@ -78,11 +78,12 @@ nph <- function(dates, ref_date = min(dates),
       dates_clean = lubridate::as_date(dates)
     }
     # put reference date in correct format
-    if (class(ref_date) == "Date") {
-      ref_date = ref_date
-    } else {
-      ref_date = lubridate::as_date(ref_date)
-    }
+    # if (class(ref_date) == "Date") {
+    #   ref_date = ref_date
+    # } else {
+    #   ref_date = lubridate::as_date(ref_date)
+    # }
+    ref_date = as.Date(ref_date, format = "%m-%d-%Y")
 
     times = lubridate::time_length(lubridate::interval(ref_date, dates_clean), time_unit)
     if (is.na(time_of_day[1]) == TRUE) {
@@ -211,7 +212,7 @@ nph <- function(dates, ref_date = min(dates),
   perc_br = sum(max_event) / length(max_event)
   perc_diag = sum(diag(p0)) / nrow(p0)
 
-  out = list(p0 = p0, g= g, h = h, k = k, br = br, k_std = k_std,
+  out = list(p0 = p0, g= g, h = h, k = k, br = br,
              time_bins = time_bins, mark_bins = mark_mat,
              dist_bins = dist_bins, perc_br = perc_br, perc_diag = perc_diag,
              time_breaks = time_breaks, mark_breaks = mark_breaks, space_breaks = space_breaks, data = df,
@@ -460,9 +461,6 @@ super_thin = function(K = "median_ci",
 
       kb = bin_f(data_pp$marks[j], mark_breaks) # was all_data, changed to data_pp
       kk = model$k[kb]
-
-      #gk = gg*kk
-      #sim_trig = sim_trig + gk
 
       hd = (sim_pp$lat[i] - data_pp$lat[j])^2 +
         (sim_pp$lon[i] - data_pp$lon[j])^2

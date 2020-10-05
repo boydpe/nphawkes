@@ -44,12 +44,24 @@ head(quake)
 We will first employ the MISD algorithm to decluster the earthquake catalog using time and marks (magnitude). The temporal bins (time_breaks) will be defined, in terms of days, and we will use roughly uniform bins for marks by setting the `mark_quantile` inputs equal to `TRUE`. We'll set out reference date to be January 1, 2010, the date that our simulated catalog began. 
 
 ```{r}
+t1 = c(0, 0.001, 0.01, 0.1, 1, 5, 10, 100, 1500)
+t2 = c(0,2,5,10, 31, 1500)
+s1 = c(0, 0.01, 0.1, 1, 10, 100)
+s2 = c(0, 0.001, 0.01, 0.1, 1, 5, 10, 50, 100)
+s3 = c(0, 0.1, 1, 5, 10, 25, 50, 100)
+s4 = c(0, 0.001, 0.01, 0.25, 0.50, 0.75, 1, 2.5, 5, 10, 25, 50, 100)
 out = nph(dates = quake$date, ref_date = "2010-01-01",
           marks = quake$m, 
-          time_breaks = c(0, 2, 5, 10, 31, 1500),
+          lat = quake$lat,
+          lon = quake$lon,
+          time_breaks = t1,
+          space_breaks = s4,
+          space_quantile = FALSE,
           time_quantile = FALSE,
           mark_quantile = TRUE,
           time_of_day = quake$time)
+
+# good luck so far with t1 and mark quantile
 
 ```
 

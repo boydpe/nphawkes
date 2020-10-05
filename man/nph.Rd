@@ -27,7 +27,7 @@ nph(
 )
 }
 \arguments{
-\item{dates}{a vector of dates, or times since initial event, as LIST DATE FORMATS ALLOWED}
+\item{dates}{a vector of dates as "yyyy-mm-dd".}
 
 \item{ref_date}{a date to serve as time 0, defaults to earliest observation}
 
@@ -62,7 +62,7 @@ nph(
 \item{dist_unit}{character string that specifies the desired unit of distance: meter, kilometer, or mile}
 
 \item{just_time}{TRUE or FALSE object. TRUE if \code{dates} object is a vector of only times,
-indicating time elapsed since start time}
+indicating time elapsed since beginning of catalog.}
 
 \item{stop_when}{scalar that serves as conversion criterion, 1e-3 as default}
 }

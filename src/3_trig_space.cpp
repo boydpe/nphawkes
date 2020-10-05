@@ -23,7 +23,7 @@ NumericVector get_h(NumericMatrix p0, NumericVector space_breaks,
     for (int l = 0; l < n_l; l++) {
       for (int i = 0; i < n_i; i++){
         for (int j = i; j < n_i; j++){
-          if(space_breaks[l] < dist_mat(i,j) && dist_mat(i,j) <= space_breaks[l+1]){
+          if(space_breaks[l] < dist_mat(i,j) && dist_mat(i,j) <= space_breaks[l + 1]){
             num_h[l] += p0(j,i);
           } else{
             num_h[l] += 0;
@@ -35,7 +35,7 @@ NumericVector get_h(NumericMatrix p0, NumericVector space_breaks,
     // denominator
 
     for (int i = 0; i < n_l; i++){
-      den_h[i] = (space_breaks[i+1] - space_breaks[i]);
+      den_h[i] = (space_breaks[i + 1] - space_breaks[i]);
     }
 
     for (int i = 0; i < n_i; i++) {
