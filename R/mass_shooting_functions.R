@@ -78,13 +78,6 @@ nph <- function(dates, ref_date = min(dates),
       dates_clean = lubridate::as_date(dates)
     }
 
-    # put reference date in correct format
-    # if (class(ref_date) == "Date") {
-    #   ref_date = ref_date
-    # } else {
-    #   ref_date = lubridate::as_date(ref_date)
-    # }
-    #ref_date = as.Date(ref_date, format = "%m-%d-%Y")
     ref_date = lubridate::as_date(ref_date)
 
     times = lubridate::time_length(lubridate::interval(ref_date, dates_clean), time_unit)
@@ -593,9 +586,9 @@ trig_plots = function(model,
                       g_xlim = c(min(model$time_breaks), max(model$time_breaks)),
                       h_xlim = c(min(model$space_breaks), max(model$space_breaks)),
                       k_xlim = c(min(model$mark_breaks), max(model$mark_breaks)),
-                      g_ylim = c(0,NA)
-                      h_ylim = c(0,NA)
-                      k_ylim = c(0,NA)
+                      g_ylim = c(0,NA),
+                      h_ylim = c(0,NA),
+                      k_ylim = c(0,NA),
                       mag_label = "magnitude"){
 
   time_breaks = model$time_breaks

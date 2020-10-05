@@ -6,23 +6,29 @@
 \usage{
 trig_plots(
   model,
-  g_max = max(model$time_breaks),
-  k_max = max(model$mark_breaks),
-  k_min = min(model$mark_breaks),
-  h_max = max(model$space_breaks),
+  g_xlim = c(min(model$time_breaks), max(model$time_breaks)),
+  h_xlim = c(min(model$space_breaks), max(model$space_breaks)),
+  k_xlim = c(min(model$mark_breaks), max(model$mark_breaks)),
+  g_ylim = c(0, NA),
+  h_ylim = c(0, NA),
+  k_ylim = c(0, NA),
   mag_label = "magnitude"
 )
 }
 \arguments{
 \item{model}{the output from \code{nph()}}
 
-\item{g_max}{the maximum x axis value shown in the temporal plot}
+\item{g_xlim}{vector of minimum and maximum x-axis value shown in the temporal plot}
 
-\item{k_max}{the maximum x axis value shown in the magnitude plot}
+\item{h_xlim}{vector of minimum and maximum x-axis value shown in the spatial plot}
 
-\item{k_min}{the minimum x axis value shown in the magnitude plot}
+\item{k_xlim}{vector of minimum and maximum x-axis value shown in the magnitude plot}
 
-\item{h_max}{the maximum x axis value shown in the spatial plot}
+\item{g_ylim}{vector of minimum and maximum y-axis value shown in the temporal plot}
+
+\item{h_ylim}{vector of minimum and maximum y-axis value shown in the spatial plot}
+
+\item{k_ylim}{vector of minimum and maximum y-axis value shown in the magnitude plot}
 
 \item{mag_label}{character string representing what the magnitude measures}
 }
