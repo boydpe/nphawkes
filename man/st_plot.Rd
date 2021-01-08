@@ -4,7 +4,12 @@
 \alias{st_plot}
 \title{Super-thinning Plot}
 \usage{
-st_plot(superthin, method = "superthin", time_label = "Year")
+st_plot(
+  superthin,
+  method = "superthin",
+  time_label = "Year",
+  plot_title = NULL
+)
 }
 \arguments{
 \item{superthin}{the output from \code{super_thin()}}
@@ -13,6 +18,8 @@ st_plot(superthin, method = "superthin", time_label = "Year")
 "superthin", "thin", or "superpose"}
 
 \item{time_label}{character string that provides the frequency of tick marks on the x-axis}
+
+\item{plot_title}{character string for the plot title}
 }
 \value{
 a tiered plot with superposed points on the top tier, points that were retained, not thinned,

@@ -4,7 +4,13 @@
 \alias{ci_hist}
 \title{Histogram of super-thinned process}
 \usage{
-ci_hist(superthin, nbins = 30, date_break = "1 year", date_label = "\%Y")
+ci_hist(
+  superthin,
+  nbins = 30,
+  date_break = "1 year",
+  date_label = "\%Y",
+  plot_title = NULL
+)
 }
 \arguments{
 \item{superthin}{the output from \code{super_thin()}}
@@ -13,6 +19,8 @@ ci_hist(superthin, nbins = 30, date_break = "1 year", date_label = "\%Y")
 
 \item{date_break}{character string of number followed by a time unit for the
 desired time difference in between x axis labels}
+
+\item{plot_title}{character string for the title of the plot}
 
 \item{date_labels}{character string of % followed by first letter of time unit, i.e.
 %Y for year, for desired label on x axis tick marks}

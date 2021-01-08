@@ -579,6 +579,7 @@ se_bars = function(model){
 #' @param h_ylim vector of minimum and maximum y-axis value shown in the spatial plot
 #' @param k_ylim vector of minimum and maximum y-axis value shown in the magnitude plot
 #' @param mag_label character string representing what the magnitude measures
+#' @param title character string for the title of the collection of triggering plots
 #'
 #' @return histogram estimators for all utilized triggering components
 #' @export
@@ -589,7 +590,8 @@ trig_plots = function(model,
                       g_ylim = c(0,NA),
                       h_ylim = c(0,NA),
                       k_ylim = c(0,NA),
-                      mag_label = "magnitude"){
+                      mag_label = "magnitude",
+                      plot_title = NULL){
 
   time_breaks = model$time_breaks
   n1 = length(time_breaks)
@@ -717,7 +719,10 @@ trig_plots = function(model,
                  type = c(rep(c("a", "b"), times = (n3-2)*2))
                )) +
     ggplot2::scale_fill_manual(values = c("black", "white")) +
-    ggplot2::theme(legend.position = "none")
+    ggplot2::theme(legend.position = "none") +
+    ggplot2::ggtitle(plot_title) +
+    ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
+                      margin = ggplot2::margin(t = 8, b = -20)))
   }
 
   if (sum(model$mark_bins) == 0 & sum(model$dist_bins) == 0){
@@ -744,11 +749,13 @@ trig_plots = function(model,
 #' @param method chacter string denoting if the residual analysis method utilized was
 #' "superthin", "thin", or "superpose"
 #' @param time_label character string that provides the frequency of tick marks on the x-axis
+#' @param plot_title character string for the plot title
 #'
 #' @return a tiered plot with superposed points on the top tier, points that were retained, not thinned,
 #' on the middle tier, and points that were thinned on the bottom tier.
 #' @export
-st_plot = function(superthin, method = "superthin", time_label = "Year"){
+st_plot = function(superthin, method = "superthin",
+                   time_label = "Year", plot_title = NULL){
 
   superthin$y = rep(0, nrow(superthin))
   for (i in 1:nrow(superthin)) {
@@ -800,7 +807,10 @@ st_plot = function(superthin, method = "superthin", time_label = "Year"){
                                   values=c("grey3", "grey40")) +
       ggplot2::xlab(time_label) +
       ggplot2::scale_y_continuous(breaks = c(0,1,2) + 0.5,
-                                  labels = c("observed", "simulated"))
+                                  labels = c("observed", "simulated")) +
+      ggplot2::ggtitle(plot_title) +
+      ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
+                                                        margin = ggplot2::margin(t = 8, b = -20)))
   }
   return(p)
 }
@@ -818,17 +828,22 @@ st_plot = function(superthin, method = "superthin", time_label = "Year"){
 #' desired time difference in between x axis labels
 #' @param date_labels character string of % followed by first letter of time unit, i.e.
 #' %Y for year, for desired label on x axis tick marks
+#' @param plot_title character string for the title of the plot
 #'
 #' @return a histogram of the super-thinned process.
 #' @export
 ci_hist = function(superthin, nbins = 30,
-                   date_break = "1 year", date_label = "%Y"){
+                   date_break = "1 year", date_label = "%Y",
+                   plot_title = NULL){
   st = superthin[which(superthin$type != "thin"),]
   out = ggplot2::ggplot(data = st) +
     ggplot2::geom_histogram(ggplot2::aes(x = Date), bins = nbins) +
     ggplot2::scale_x_date(date_breaks = date_break,
                           date_labels = date_label) +
-    ggplot2::ylab("frequency")
+    ggplot2::ylab("frequency") +
+    ggplot2::ggtitle(plot_title) +
+    ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
+                                                      margin = ggplot2::margin(t = 8, b = -20)))
 
   return(out)
 }
@@ -846,12 +861,14 @@ ci_hist = function(superthin, nbins = 30,
 #' @param superthin the output from \code{super_thin()}
 #' @param min_date the minimum date to be shown on the plot
 #' @param max_date the maximum date to be shown on the plot
+#' @param plot_title character string for the title of the plot
 #'
 #' @return a plot that shows the estimated conditional intensity with the number of monthly events
 #' @export
 ci_plot = function(model, min_date = model$input$ref_date,
                    max_date = model$data$dates[nrow(model$data)],
-                   superthin){
+                   superthin,
+                   plot_title = NULL){
 
   df = model$data
   df$Year = lubridate::year(df$dates)
@@ -889,6 +906,9 @@ ci_plot = function(model, min_date = model$input$ref_date,
         legend.position = "right") +
         ggplot2::scale_linetype_manual(name = "Number of \nMonthly Events",
                         labels = c("Observed", "Estimated"),
-                        values = c("solid", "dashed"))
+                        values = c("solid", "dashed")) +
+    ggplot2::ggtitle(plot_title) +
+    ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
+                                                      margin = ggplot2::margin(t = 8, b = -20)))
 }
 

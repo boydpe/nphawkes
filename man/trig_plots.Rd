@@ -12,7 +12,8 @@ trig_plots(
   g_ylim = c(0, NA),
   h_ylim = c(0, NA),
   k_ylim = c(0, NA),
-  mag_label = "magnitude"
+  mag_label = "magnitude",
+  plot_title = NULL
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ trig_plots(
 \item{k_ylim}{vector of minimum and maximum y-axis value shown in the magnitude plot}
 
 \item{mag_label}{character string representing what the magnitude measures}
+
+\item{title}{character string for the title of the collection of triggering plots}
 }
 \value{
 histogram estimators for all utilized triggering components

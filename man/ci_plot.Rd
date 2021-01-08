@@ -8,7 +8,8 @@ ci_plot(
   model,
   min_date = model$input$ref_date,
   max_date = model$data$dates[nrow(model$data)],
-  superthin
+  superthin,
+  plot_title = NULL
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ ci_plot(
 \item{max_date}{the maximum date to be shown on the plot}
 
 \item{superthin}{the output from \code{super_thin()}}
+
+\item{plot_title}{character string for the title of the plot}
 }
 \value{
 a plot that shows the estimated conditional intensity with the number of monthly events
