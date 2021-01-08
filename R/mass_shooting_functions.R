@@ -719,21 +719,34 @@ trig_plots = function(model,
                  type = c(rep(c("a", "b"), times = (n3-2)*2))
                )) +
     ggplot2::scale_fill_manual(values = c("black", "white")) +
-    ggplot2::theme(legend.position = "none") +
-    ggplot2::ggtitle(plot_title) +
-    ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
-                      margin = ggplot2::margin(t = 8, b = -20)))
+    ggplot2::theme(legend.position = "none")
+
   }
 
+  # if (sum(model$mark_bins) == 0 & sum(model$dist_bins) == 0){
+  #   out = gridExtra::grid.arrange(trig_g, ncol = 1)
+  # } else if (sum(model$mark_bins) != 0 & sum(model$dist_bins) == 0) {
+  #   out = gridExtra::grid.arrange(trig_g, trig_k, ncol = 2)
+  # } else if (sum(model$mark_bins) == 0 & sum(model$dist_bins) != 0) {
+  #   out = gridExtra::grid.arrange(trig_g, trig_h, ncol = 2)
+  # } else {
+  #   out = gridExtra::grid.arrange(trig_g, trig_h, trig_k, ncol = 3)
+  # }
   if (sum(model$mark_bins) == 0 & sum(model$dist_bins) == 0){
-    out = gridExtra::grid.arrange(trig_g, ncol = 1)
+    out = cowplot::plot_grid(trig_g, ncol = 1)
   } else if (sum(model$mark_bins) != 0 & sum(model$dist_bins) == 0) {
-    out = gridExtra::grid.arrange(trig_g, trig_k, ncol = 2)
+    out = cowplot::plot_grid(trig_g, trig_k, ncol = 2)
   } else if (sum(model$mark_bins) == 0 & sum(model$dist_bins) != 0) {
-    out = gridExtra::grid.arrange(trig_g, trig_h, ncol = 2)
+    out = cowplot::plot_grid(trig_g, trig_h, ncol = 2)
   } else {
-    out = gridExtra::grid.arrange(trig_g, trig_h, trig_k, ncol = 3)
+    out = cowplot::plot_grid(trig_g, trig_h, trig_k, ncol = 3)
   }
+
+  title = ggdraw() +
+    draw_label(plot_title, x = 0, hjust = 0) +
+    theme(plot.margin = margin(0, 0, 0, 7))
+
+  out = plot_grid(title, out, ncol = 1, rel_heights = c(0.1, 1))
   return(out)
 }
 
