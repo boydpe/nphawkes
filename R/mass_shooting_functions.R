@@ -742,11 +742,11 @@ trig_plots = function(model,
     out = cowplot::plot_grid(trig_g, trig_h, trig_k, ncol = 3)
   }
 
-  title = ggdraw() +
-    draw_label(plot_title, x = 0, hjust = 0) +
-    theme(plot.margin = margin(0, 0, 0, 7))
+  title = cowplot::ggdraw() +
+    cowplot::draw_label(plot_title, x = 0, hjust = 0) +
+    ggplot2::theme(plot.margin = ggplot2::margin(0, 0, 0, 7))
 
-  out = plot_grid(title, out, ncol = 1, rel_heights = c(0.1, 1))
+  out = cowplot::plot_grid(title, out, ncol = 1, rel_heights = c(0.1, 1))
   return(out)
 }
 
