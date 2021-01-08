@@ -33,7 +33,7 @@ trig_plots(
 \item{mag_label}{character string representing what the magnitude measures}
 }
 \value{
-histogram estimaotrs for all utilized triggering components
+histogram estimators for all utilized triggering components
 }
 \description{
 This function exports histogram estimators for all utilized triggering components. Plots show

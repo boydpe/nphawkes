@@ -2,7 +2,7 @@
 # Mass Shooting Functions
 
 
-# Rcpp::compileAttributes() #when changeing c++ code
+# Rcpp::compileAttributes() #when changing c++ code
 # devtools::document() #to update whole thing
 # devtools::load_all() #to temp install
 # library(nphawkes) #to use
@@ -580,7 +580,7 @@ se_bars = function(model){
 #' @param k_ylim vector of minimum and maximum y-axis value shown in the magnitude plot
 #' @param mag_label character string representing what the magnitude measures
 #'
-#' @return histogram estimaotrs for all utilized triggering components
+#' @return histogram estimators for all utilized triggering components
 #' @export
 trig_plots = function(model,
                       g_xlim = c(min(model$time_breaks), max(model$time_breaks)),
@@ -614,9 +614,12 @@ trig_plots = function(model,
                         dist = space_breaks,
                        se = c(se_h, se_h[length(se_h)]))
 
-  g_ylim[2] = ifelse(is.na(g_ylim[2]), max(time_df$g + time_df$se, g_ylim[2]))
-  h_ylim[2] = ifelse(is.na(h_ylim[2]), max(dist_df$h + dist_df$se, h_ylim[2]))
-  k_ylim[2] = ifelse(is.na(k_ylim[2]), max(mag_df$k + mag_df$se, k_ylim[2]))
+  g_ylim[2] = ifelse(is.na(g_ylim[2]) == TRUE,
+                     max(time_df$g + time_df$se), g_ylim[2])
+  h_ylim[2] = ifelse(is.na(h_ylim[2]) == TRUE,
+                     max(dist_df$h + dist_df$se), h_ylim[2])
+  k_ylim[2] = ifelse(is.na(k_ylim[2]) == TRUE,
+                     max(mag_df$k + mag_df$se), k_ylim[2])
 
 
   # Time Plot
