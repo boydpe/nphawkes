@@ -914,14 +914,18 @@ ci_plot = function(model, min_date = model$input$ref_date,
     dplyr::mutate(type = "data") %>%
     dplyr::bind_rows(ci_one) %>%
     ggplot2::ggplot() +
-      ggplot2::geom_line(ggplot2::aes(x = Date, y = n, linetype = type)) +
-      ggplot2::theme(axis.title.y=ggplot2::element_blank(),
+      #ggplot2::geom_line(ggplot2::aes(x = Date, y = n, linetype = type)) +
+    ggplot2::geom_segment(ggplot2::aes(x = Date, y = n,
+                              xend = Date, yend = 0),
+                          alpha = 0.5) +
+    ggplot2::geom_line(data = ci_one,
+                       ggplot2::aes(x = Date, y = n),
+                       linetype = "solid") +
+    ggplot2::theme(axis.title.y=ggplot2::element_blank(),
         legend.position = "right") +
         ggplot2::scale_linetype_manual(name = "Number of \nMonthly Events",
                         labels = c("Observed", "Estimated"),
                         values = c("solid", "dashed")) +
-    ggplot2::ggtitle(plot_title) +
-    ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
-                                                      margin = ggplot2::margin(t = 8, b = -20)))
+    ggplot2::ggtitle(plot_title)
 }
 
