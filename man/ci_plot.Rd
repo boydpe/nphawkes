@@ -24,7 +24,8 @@ ci_plot(
 \item{plot_title}{character string for the title of the plot}
 }
 \value{
-a plot that shows the estimated conditional intensity with the number of monthly events
+a plot that shows the estimated conditional intensity as a black line with the number of monthly events as
+gray vertical lines
 }
 \description{
 In this function, the estimated conditional intensity is plotted against

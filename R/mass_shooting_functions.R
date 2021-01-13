@@ -876,7 +876,8 @@ ci_hist = function(superthin, nbins = 30,
 #' @param max_date the maximum date to be shown on the plot
 #' @param plot_title character string for the title of the plot
 #'
-#' @return a plot that shows the estimated conditional intensity with the number of monthly events
+#' @return a plot that shows the estimated conditional intensity as a black line with the number of monthly events as
+#' gray vertical lines
 #' @export
 ci_plot = function(model, min_date = model$input$ref_date,
                    max_date = model$data$dates[nrow(model$data)],
@@ -921,11 +922,12 @@ ci_plot = function(model, min_date = model$input$ref_date,
     ggplot2::geom_line(data = ci_one,
                        ggplot2::aes(x = Date, y = n),
                        linetype = "solid") +
-    ggplot2::theme(axis.title.y=ggplot2::element_blank(),
-        legend.position = "right") +
-        ggplot2::scale_linetype_manual(name = "Number of \nMonthly Events",
-                        labels = c("Observed", "Estimated"),
-                        values = c("solid", "dashed")) +
+    # ggplot2::theme(axis.title.y=ggplot2::element_blank(),
+    #     legend.position = "right") +
+    #     ggplot2::scale_linetype_manual(name = "Number of \nMonthly Events",
+    #                     labels = c("Observed", "Estimated"),
+    #                     values = c("solid", "dashed")) +
+    ggplot2::ylab("Number of Monthly Events") +
     ggplot2::ggtitle(plot_title)
 }
 
