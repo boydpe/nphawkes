@@ -797,7 +797,7 @@ st_plot = function(superthin, method = "superthin",
                        values=c("grey3", "grey40", "grey70")) +
     ggplot2::xlab(time_label) +
     ggplot2::scale_y_continuous(breaks = c(0,1,2) + 0.5,
-                       labels = c("thinned", "retained", "simulated"))
+                       labels = c("Thinned", "Retained", "Simulated"))
 
   } else if (method == "thin"){
     p = superthin %>% dplyr::filter(type != "sim") %>%
@@ -811,7 +811,7 @@ st_plot = function(superthin, method = "superthin",
                                   values=c("grey40", "grey70")) +
       ggplot2::xlab(time_label) +
       ggplot2::scale_y_continuous(breaks = c(0,1,2) + 0.5,
-                                  labels = c("thinned", "retained"))
+                                  labels = c("Thinned", "Retained"))
 
   } else {
     p = superthin %>% dplyr::mutate(type = replace(type, type == "thin", "retain")) %>%
@@ -825,7 +825,7 @@ st_plot = function(superthin, method = "superthin",
                                   values=c("grey3", "grey40")) +
       ggplot2::xlab(time_label) +
       ggplot2::scale_y_continuous(breaks = c(0,1,2) + 0.5,
-                                  labels = c("observed", "simulated")) +
+                                  labels = c("Observed", "Simulated")) +
       ggplot2::ggtitle(plot_title) +
       ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
                                                         margin = ggplot2::margin(t = 8, b = -20)))
@@ -859,9 +859,9 @@ ci_hist = function(superthin, nbins = 30,
     # ggplot2::scale_x_date(date_breaks = date_break,
     #                       date_labels = date_label) +
     ggplot2::ylab("frequency") +
-    ggplot2::ggtitle(plot_title) +
-    ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
-                                                      margin = ggplot2::margin(t = 8, b = -20)))
+    ggplot2::ggtitle(plot_title)
+    # ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
+    #                                                   margin = ggplot2::margin(t = 8, b = -20)))
 
   return(out)
 }
