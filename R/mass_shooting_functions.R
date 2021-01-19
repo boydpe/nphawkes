@@ -646,7 +646,8 @@ trig_plots = function(model,
   }
 
   trig_g = trig_g + ggplot2::geom_step(ggplot2::aes(group=1)) +
-    ggplot2::scale_x_continuous(breaks = round(model$time_breaks, 1)) +
+    ggplot2::scale_x_continuous(breaks = round(model$time_breaks, 1),
+                                minor_breaks = time_breaks) +
     ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
                shape = 21,
                data = data.frame(
@@ -679,7 +680,9 @@ trig_plots = function(model,
   trig_k = trig_k + ggplot2::geom_step(ggplot2::aes(group=1)) +
     ggplot2::scale_x_continuous(breaks =
                          c(round(min(model$input$marks),1),
-                           round(model$mark_breaks[-1],1))) +
+                           round(model$mark_breaks[-1],1)),
+                         minor_breaks = c(round(min(model$input$marks),1),
+                                          round(model$mark_breaks[-1],1))) +
     ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
                shape = 21,
                data = data.frame(
@@ -853,8 +856,8 @@ ci_hist = function(superthin, nbins = 30,
   st = superthin[which(superthin$type != "thin"),]
   out = ggplot2::ggplot(data = st) +
     ggplot2::geom_histogram(ggplot2::aes(x = Date), bins = nbins) +
-    ggplot2::scale_x_date(date_breaks = date_break,
-                          date_labels = date_label) +
+    # ggplot2::scale_x_date(date_breaks = date_break,
+    #                       date_labels = date_label) +
     ggplot2::ylab("frequency") +
     ggplot2::ggtitle(plot_title) +
     ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
@@ -931,5 +934,9 @@ ci_plot = function(model, min_date = model$input$ref_date,
     #                     values = c("solid", "dashed")) +
     ggplot2::ylab("Number of Monthly Events") +
     ggplot2::ggtitle(plot_title)
+    # ggplot2::scale_x_date(breaks = seq(
+    #   from = lubridate::year(model$ref_date),
+    #   to = lubridate::year(max)))
+      #labels = lubridate::year(model$ref_date):lubridate::year(max))
 }
 
