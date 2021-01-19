@@ -596,6 +596,8 @@ trig_plots = function(model,
   time_breaks = model$time_breaks
   n1 = length(time_breaks)
   mark_breaks = model$mark_breaks
+  mark_breaks[1] = min(model$data$marks)
+
   n2 = length(mark_breaks)
   space_breaks = model$space_breaks
   n3 = length(space_breaks)
@@ -681,9 +683,9 @@ trig_plots = function(model,
     ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
                shape = 21,
                data = data.frame(
-                 x = sort(rep(mag_df$magnitude, 2))[-c(1,2,2*n2 -1 ,2*n2)],
-                 y = c(rep(mag_df$k[1:(n2-2)], each = 2)[-1], mag_df$k[n2]),
-                 type = c(rep(c("a", "b"), times = (n2-2)*2))
+                 x = sort(rep(mag_df$magnitude, 2))[-c(2, 2*n2 -1 ,2*n2)],
+                 y = c(rep(mag_df$k[1:(n2-2)], each = 2), mag_df$k[n2]),
+                 type = c("a", rep(c("a", "b"), times = (n2-2)))
                )) +
     ggplot2::scale_fill_manual(values = c("black", "white")) +
     ggplot2::theme(legend.position = "none")
