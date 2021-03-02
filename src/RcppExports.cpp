@@ -114,7 +114,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // get_g
-NumericVector get_g(NumericMatrix p0, NumericVector time_breaks, NumericMatrix time_mat);
+NumericMatrix get_g(NumericMatrix p0, NumericVector time_breaks, NumericMatrix time_mat);
 RcppExport SEXP _nphawkes_get_g(SEXP p0SEXP, SEXP time_breaksSEXP, SEXP time_matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

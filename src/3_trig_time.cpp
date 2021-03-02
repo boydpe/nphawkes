@@ -2,16 +2,17 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-NumericVector get_g(NumericMatrix p0, NumericVector time_breaks,
+NumericMatrix get_g(NumericMatrix p0, NumericVector time_breaks,
                        NumericMatrix  time_mat) {
 
   // numerator
   int n_l = time_breaks.size() - 1;
   int n_i = pow(p0.size(), 0.5);
   NumericVector num_g(n_l);
-  NumericVector g(n_l);
   NumericVector den_g(n_l);
   double diag_sum;
+  NumericMatrix g_vals(n_l, 2);
+
 
   for (int l = 0; l < n_l; l++) {
     for (int i = 0; i < n_i; i++){
@@ -36,7 +37,11 @@ NumericVector get_g(NumericMatrix p0, NumericVector time_breaks,
   }
 
   den_g = den_g * (sum(p0) - diag_sum);
-  g = num_g/den_g;
-  return g;
+
+  for (int i = 0; i < n_l; i++) {
+    g_vals(i,0) = num_g[i];
+    g_vals(i,1) = den_g[i];
+  }
+  return g_vals;
 }
 

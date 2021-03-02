@@ -193,7 +193,8 @@ nph <- function(dates, ref_date = min(dates),
 
   while( max_diff > stopwhen){
     br = calc_br(p0, times)
-    g = get_g(p0, time_breaks, time_mat)
+    g_vals = get_g(p0, time_breaks, time_mat)
+    g = g_vals[,1] / g_vals[,2]
     h = get_h(p0, space_breaks, dist_mat)
     k = get_k(p0, marks, mark_breaks)
     p = update_p(p0, time_mat, dist_mat, mark_mat,
