@@ -221,7 +221,7 @@ nph <- function(dates, ref_date = min(dates),
              time_bins = time_bins, mark_bins = mark_mat,
              dist_bins = dist_bins, perc_br = perc_br, perc_diag = perc_diag,
              time_breaks = time_breaks, mark_breaks = mark_breaks, space_breaks = space_breaks, data = df,
-             ref_date = ref_date,
+             ref_date = ref_date, n_iterations = n_iterations,
              input =   mget(names(formals()),sys.frame(sys.nframe())))
   return(out)
 }
