@@ -66,6 +66,7 @@
 #' @return \code{time_bins} is a matrix containing the temporal bin of each pair of events
 #' @return \code{dist_bins} is a matrix containing the spatial bin of each pair of events
 #' @return \code{mark_bins} is a vector containing the magnitude bin of each event
+#' @return \code{n_iterations} is the number of iterations executed until convergence
 #' @return \code{input} is a list of all inputs
 
 
@@ -188,6 +189,7 @@ nph <- function(dates, ref_date = min(dates),
   # update matrix, check if converge
   p0 = init_p0(times)
   max_diff = 1
+  n_iterations = 0
 
   while( max_diff > stopwhen){
     br = calc_br(p0, times)
@@ -200,6 +202,7 @@ nph <- function(dates, ref_date = min(dates),
                  br, time_bins, dist_bins, lat)
     max_diff = check_p(p0, p)
     p0 = p
+    n_iterations = n_iterations + 1
   }
 
   max_event = c()
@@ -651,10 +654,10 @@ trig_plots = function(model,
   trig_g = ggplot2::ggplot(time_df, ggplot2::aes(time, g)) +
     ggplot2::coord_cartesian(xlim = g_xlim, ylim = g_ylim) +
     ggplot2::xlab(paste("t (time in ", model$input$time_unit, "s)", sep = "")) +
-    ggplot2::ylab("g(t)") +
-    ggplot2::theme(axis.title.x = element_text(size = 20),
-                   axis.title.y = element_text(size = 20),
-                   axis.text = element_text(size = 20))
+    ggplot2::ylab("g(t)")
+    # ggplot2::theme(axis.title.x = element_text(size = 20),
+    #                axis.title.y = element_text(size = 20),
+    #                axis.text = element_text(size = 20))
 
   for (i in 1:(n1-1)){
     trig_g = trig_g +
@@ -687,11 +690,11 @@ trig_plots = function(model,
   trig_k = ggplot2::ggplot(mag_df, ggplot2::aes(magnitude, k)) +
     ggplot2::coord_cartesian(xlim = k_xlim, ylim = k_ylim) +
     ggplot2::xlab(paste("m (", mag_label, ")", sep = "")) +
-    ggplot2::ylab("k(m)") +
+    ggplot2::ylab("k(m)")
     # delete this
-    ggplot2::theme(axis.title.x = element_text(size = 20),
-                   axis.title.y = element_text(size = 20),
-                   axis.text = element_text(size = 20))
+    # ggplot2::theme(axis.title.x = element_text(size = 20),
+    #                axis.title.y = element_text(size = 20),
+    #                axis.text = element_text(size = 20))
 
   for (i in 1:(n2-1)){
     trig_k = trig_k + ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),

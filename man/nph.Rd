@@ -102,6 +102,8 @@ is as a background event
 
 \code{mark_bins} is a vector containing the magnitude bin of each event
 
+\code{n_iterations} is the number of iterations executed until convergence
+
 \code{input} is a list of all inputs
 }
 \description{
