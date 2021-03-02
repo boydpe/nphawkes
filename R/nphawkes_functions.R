@@ -787,9 +787,10 @@ trig_plots = function(model,
     ggplot2::theme_set(cowplot::theme_cowplot(font_size=20)) +
     ggplot2::theme(plot.margin = ggplot2::margin(0, 0, 0, 7))
 
-  out = cowplot::plot_grid(title, out, ncol = 1, rel_heights = c(0.15, 1))
-  return(all_plots = out, time_plot = trig_g,
+  all_plots = cowplot::plot_grid(title, out, ncol = 1, rel_heights = c(0.15, 1))
+  out = list(all_plots = all_plots, time_plot = trig_g,
          space_plot = trig_h, mark_plot = trig_k)
+  return(out)
 }
 
 
