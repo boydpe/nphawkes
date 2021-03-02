@@ -10,7 +10,7 @@ NumericMatrix get_g(NumericMatrix p0, NumericVector time_breaks,
   int n_i = pow(p0.size(), 0.5);
   NumericVector num_g(n_l);
   NumericVector den_g(n_l);
-  double diag_sum;
+  double diag_sum = 0;
   NumericMatrix g_vals(n_l, 2);
 
 
