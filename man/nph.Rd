@@ -35,7 +35,7 @@ nph(
 
 \item{lon}{a vector of longitudes, omit if not using spatial data}
 
-\item{marks}{a vecotr of marks, or magnitudes, omit if not using marked process}
+\item{marks}{a vecotr of marks, or magnitudes, omit if not using marked data}
 
 \item{time_breaks}{a vector of cutoff values for temporal bins of time differences}
 
@@ -43,9 +43,9 @@ nph(
 
 \item{mark_breaks}{a vector of cutoff values for magnitude bins}
 
-\item{time_quantile}{FALSE by default to use defined temporal bins, TRUE to establish unifrom bins}
+\item{time_quantile}{FALSE by default to use defined temporal bins, TRUE to establish uniform bins}
 
-\item{mark_quantile}{FALSE by default to use defined magnitude bins, TRUE to establish unifrom bins}
+\item{mark_quantile}{FALSE by default to use defined magnitude bins, TRUE to establish uniform bins}
 
 \item{space_quantile}{FALSE by default to use defined spatial bins, TRUE to establish uniform bins}
 
@@ -64,7 +64,19 @@ nph(
 \item{just_time}{TRUE or FALSE object. TRUE if \code{dates} object is a vector of only times,
 indicating time elapsed since beginning of catalog.}
 
-\item{stop_when}{scalar that serves as conversion criterion, 1e-3 as default}
+\item{stop_when}{scalar that serves as conversion criterion, 1e-3 as default
+
+This function can only be applied to data that contains a temporal feature. It can also be applied to data
+consisting of time and space, time and marks, or time and space and marks.
+
+For each triggering component used (time, space, marks), a binning structure will be applied. The user may define
+these right continuous bins as a vector ([c(1,5,10)] creates two bins for 1 < x \leq 5, and 5 < x \leq 10),
+or may be generated automatically by specifying \code{time_breaks = TRUE}, with the same applying for marks and space.
+This method will establish breaks such that the allocation of time differences within the data will be roughly
+equal in each created bin. Further specifying \code{g_length} will control the number of bins established, with the
+default producing 6 bins. Uniform binning methods may unattainable for discrete marks containing many replicates of values.
+
+If no time of day is provided, events will be randomly assigned a time during the event's date.}
 }
 \value{
 Probability matrix \code{p0} containing the probabilities that event
@@ -94,5 +106,6 @@ is as a background event
 }
 \description{
 This function uses nonparametric procedures to analyze a Hawkes
-process in temporal or spatio-temporal domain, with or without marks.
+process in temporal or spatio-temporal domain, with or without marks
+through the Model independent stochastic declustering algorithm.
 }

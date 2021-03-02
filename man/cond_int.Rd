@@ -7,7 +7,10 @@
 cond_int(model)
 }
 \arguments{
-\item{model}{the output from \code{nph()}}
+\item{model}{the output from \code{nph()}
+
+This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+Using the output from the \code{nph()} function,}
 }
 \value{
 a data frame containing the time, location, marks, and estimated conditional intensity

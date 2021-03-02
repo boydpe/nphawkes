@@ -10,7 +10,7 @@ super_thin(
   method = "superthin",
   map = world,
   region = ".",
-  sim_grid = FALSE,
+  sim_grid = TRUE,
   lat_bounds = c(min(model$data$lat), max(model$data$lat)),
   lon_bounds = c(min(model$data$lon), max(model$data$lon))
 )
@@ -33,10 +33,17 @@ certain area, such as 0x1 by 0x1 grid, FALSE if using specific region or not usi
 
 \item{lat_bounds}{vector containing minimum and maximum latitude bounds if sim_grid is TRUE}
 
-\item{lon_bounds}{vector containing minimum and maximum longitude bounds if sim_gird is TRUE}
+\item{lon_bounds}{vector containing minimum and maximum longitude bounds if sim_gird is TRUE
+
+This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+
+To simulate spatial data, the user may define the \code{map} and \code{region} to easily simulate points within
+set political borders. Otherwise, simulated points may be established when \code{sim_grid = TRUE}.
+
+The parameter \code{K}}
 }
 \value{
-a data frame which includes the time, location, and estimted conditional intensity of events.
+a data frame which includes the time, location, and estimated conditional intensity of events.
 The type of event, either observed or simulated, is noted along with the probability that the event was kept
 and wheter or not the point was in fact retained.
 }

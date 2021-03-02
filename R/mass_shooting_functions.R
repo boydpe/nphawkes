@@ -11,24 +11,26 @@
 
 # maybe rename misd?
 # only uses lubridate
+
 #' Model Independent Stochastic Declustering
 #'
 #' This function uses nonparametric procedures to analyze a Hawkes
-#' process in temporal or spatio-temporal domain, with or without marks.
+#' process in temporal or spatio-temporal domain, with or without marks
+#' through the Model independent stochastic declustering algorithm.
 #'
 #'
 #' @param dates a vector of dates as "yyyy-mm-dd".
 #' @param lat a vector of latitudes, omit if not using spatial data
 #' @param lon a vector of longitudes, omit if not using spatial data
-#' @param marks a vecotr of marks, or magnitudes, omit if not using marked process
+#' @param marks a vecotr of marks, or magnitudes, omit if not using marked data
 #' @param time_breaks a vector of cutoff values for temporal bins of time differences
 #' @param space_breaks a vector of cutoff values for spatial bins of distance differences
 #' @param mark_breaks a vector of cutoff values for magnitude bins
-#' @param time_quantile FALSE by default to use defined temporal bins, TRUE to establish unifrom bins
+#' @param time_quantile FALSE by default to use defined temporal bins, TRUE to establish uniform bins
 #' @param g_length a scalar to define the number of desired uniform temporal bins
 #' @param space_quantile FALSE by default to use defined spatial bins, TRUE to establish uniform bins
 #' @param h_length a scalar to define the number of desired unifrom spatial bins
-#' @param mark_quantile FALSE by default to use defined magnitude bins, TRUE to establish unifrom bins
+#' @param mark_quantile FALSE by default to use defined magnitude bins, TRUE to establish uniform bins
 #' @param k_length a scalar to define the number of desired magnitude bins
 #' @param ref_date a date to serve as time 0, defaults to earliest observation
 #' @param time_of_day character string that lists the time of day of events, as hour:minute:second
@@ -37,6 +39,19 @@
 #' @param time_unit character string that specifies the desired unit of time
 #' @param dist_unit character string that specifies the desired unit of distance: meter, kilometer, or mile
 #' @param stop_when scalar that serves as conversion criterion, 1e-3 as default
+#'
+#' This function can only be applied to data that contains a temporal feature. It can also be applied to data
+#' consisting of time and space, time and marks, or time and space and marks.
+#'
+#' For each triggering component used (time, space, marks), a binning structure will be applied. The user may define
+#' these right continuous bins as a vector ([c(1,5,10)] creates two bins for 1 < x \leq 5, and 5 < x \leq 10),
+#' or may be generated automatically by specifying \code{time_breaks = TRUE}, with the same applying for marks and space.
+#' This method will establish breaks such that the allocation of time differences within the data will be roughly
+#' equal in each created bin. Further specifying \code{g_length} will control the number of bins established, with the
+#' default producing 6 bins. Uniform binning methods may unattainable for discrete marks containing many replicates of values.
+#'
+#' If no time of day is provided, events will be randomly assigned a time during the event's date.
+#'
 #'
 #' @return Probability matrix \code{p0} containing the probabilities that event
 #' \code{i} is an offspring of event \code{j}, \code{i > j}. Diagonal elements
@@ -174,7 +189,6 @@ nph <- function(dates, ref_date = min(dates),
   p0 = init_p0(times)
   max_diff = 1
 
-  # uu = 1
   while( max_diff > stopwhen){
     br = calc_br(p0, times)
     g = get_g(p0, time_breaks, time_mat)
@@ -184,14 +198,10 @@ nph <- function(dates, ref_date = min(dates),
                  g, h, k,
                  space_breaks, time_breaks, mark_breaks,
                  br, time_bins, dist_bins, lat)
-    # print(p[1:5, 1:5])
     max_diff = check_p(p0, p)
     p0 = p
-    # uu = uu + 1
-    # print(uu)
-
   }
-  # is the max value per row background or trig?
+
   max_event = c()
   for ( i in 1:nrow(p0)){
     if (p0[i,i] == max(p0[i,])){
@@ -200,9 +210,6 @@ nph <- function(dates, ref_date = min(dates),
       max_event[i] = 0
     }
   }
-
-  area = diff(mark_breaks)*k
-  k_std = area / sum(area)
 
   perc_br = sum(max_event) / length(max_event)
   perc_diag = sum(diag(p0)) / nrow(p0)
@@ -213,7 +220,6 @@ nph <- function(dates, ref_date = min(dates),
              time_breaks = time_breaks, mark_breaks = mark_breaks, space_breaks = space_breaks, data = df,
              ref_date = ref_date,
              input =   mget(names(formals()),sys.frame(sys.nframe())))
-  # out = p0
   return(out)
 }
 
@@ -226,6 +232,9 @@ nph <- function(dates, ref_date = min(dates),
 #' This function estimates the conditional intensity function of the observed process.
 #'
 #' @param model the output from \code{nph()}
+#'
+#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+#' Using the output from the \code{nph()} function,
 #'
 #' @return a data frame containing the time, location, marks, and estimated conditional intensity
 #' @export
@@ -312,7 +321,6 @@ cond_int = function(model) {
 #' @param K a constant or character string that governs the amount of thinning and
 #' superposing that is implemented. Can be a constant value, the median, mean, minimum, or maximum
 #'  conditional intensity: "median_ci", "mean_ci", "min_ci", or "max_ci", respectively.
-#'
 #' @param model the output from \code{nph()}
 #' @param method character string that defines residual analysis method as "superthin", "thin", or "superpose"
 #' @param map name of map provided by the maps package, defaults to maps::world
@@ -322,14 +330,21 @@ cond_int = function(model) {
 #' @param lat_bounds vector containing minimum and maximum latitude bounds if sim_grid is TRUE
 #' @param lon_bounds vector containing minimum and maximum longitude bounds if sim_gird is TRUE
 #'
-#' @return a data frame which includes the time, location, and estimted conditional intensity of events.
+#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+#'
+#' To simulate spatial data, the user may define the \code{map} and \code{region} to easily simulate points within
+#' set political borders. Otherwise, simulated points may be established when \code{sim_grid = TRUE}.
+#'
+#' The parameter \code{K}
+#'
+#' @return a data frame which includes the time, location, and estimated conditional intensity of events.
 #' The type of event, either observed or simulated, is noted along with the probability that the event was kept
 #' and wheter or not the point was in fact retained.
 #' @export
 super_thin = function(K = "median_ci",
                       model, method = "superthin",
                       map = world, region = ".",
-                      sim_grid = FALSE,
+                      sim_grid = TRUE,
                       lat_bounds = c(min(model$data$lat), max(model$data$lat)),
                       lon_bounds = c(min(model$data$lon), max(model$data$lon))) {
 
@@ -402,7 +417,7 @@ super_thin = function(K = "median_ci",
   n2 = nrow(sim_pp)
   rate = (mean(marks) - min(marks))^(-1)
   sim_pp$marks = round(rexp(n2, rate)) + min(marks)
-  # not actually using simulated marks - so no parametric assumptions
+  # not actually using simulated marks
   if (sum(model$lat) == 0) {
     sim_pp = cbind(sim_pp, lat = rep(0, n2), lon = rep(0, n2))
   } else{
@@ -448,13 +463,12 @@ super_thin = function(K = "median_ci",
   for (i in 1:n2) {
     sim_trig = 0
     # get triggering component for each
-    for (j in 1:(sim_pp$row1[i])){# cut -1 from end
-      td = sim_pp$Time[i] - data_pp$Time[j] # last bit was sim_data$row1[j]
-      # change second to last obs time, need just obs data
+    for (j in 1:(sim_pp$row1[i])){
+      td = sim_pp$Time[i] - data_pp$Time[j]
       gb = bin_f(td, time_breaks)
       gg = model$g[gb]
 
-      kb = bin_f(data_pp$marks[j], mark_breaks) # was all_data, changed to data_pp
+      kb = bin_f(data_pp$marks[j], mark_breaks)
       kk = model$k[kb]
 
       hd = (sim_pp$lat[i] - data_pp$lat[j])^2 +
@@ -487,7 +501,6 @@ super_thin = function(K = "median_ci",
   ci_sim = ci_sim[which(ci_sim$keep == 1),]
   ci_st = rbind(ci_data, ci_sim)
   ci_st = ci_st[order(ci_st$times),]
-  #ci_st$rv = runif(nrow(ci_st), 0, 1)
 
   if (method == "superthin") {
     ci_st = ci_st
@@ -507,6 +520,9 @@ super_thin = function(K = "median_ci",
 #' This function estimates the variance of each bin for all utilized triggering components.
 #'
 #' @param model the output from \code{nph()}
+#'
+#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+#' and is used within the function that produces triggering plots.
 #'
 #' @return a list of variance estimates for all utilized triggering component
 
@@ -565,7 +581,6 @@ se_bars = function(model){
 
 # Trig Plots ------------------------------------------------------------
 
-# ggplot2 and gridExtra
 #' Triggering Plots
 #'
 #' This function exports histogram estimators for all utilized triggering components. Plots show
@@ -581,7 +596,13 @@ se_bars = function(model){
 #' @param mag_label character string representing what the magnitude measures
 #' @param title character string for the title of the collection of triggering plots
 #'
-#' @return histogram estimators for all utilized triggering components
+#' @return \code{all_plots} is a cowplot object of histogram estimators for all utilized triggering components
+#' @return \code{time_plot} is a ggplot object of the histogram estimator for the temporal effect
+#' @return \code{space_plot} is a ggplot object of the histogram estimator for the spatial effect,
+#' NULL if data provided is not a spatial process
+#' @return \code{mark_plot} is a ggplot object of the histogram estimator for the mark effect,
+#' NULL if data provided is not a marked process
+
 #' @export
 trig_plots = function(model,
                       g_xlim = c(min(model$time_breaks), max(model$time_breaks)),
@@ -630,7 +651,10 @@ trig_plots = function(model,
   trig_g = ggplot2::ggplot(time_df, ggplot2::aes(time, g)) +
     ggplot2::coord_cartesian(xlim = g_xlim, ylim = g_ylim) +
     ggplot2::xlab(paste("t (time in ", model$input$time_unit, "s)", sep = "")) +
-    ggplot2::ylab("g(t)")
+    ggplot2::ylab("g(t)") +
+    ggplot2::theme(axis.title.x = element_text(size = 20),
+                   axis.title.y = element_text(size = 20),
+                   axis.text = element_text(size = 20))
 
   for (i in 1:(n1-1)){
     trig_g = trig_g +
@@ -663,7 +687,11 @@ trig_plots = function(model,
   trig_k = ggplot2::ggplot(mag_df, ggplot2::aes(magnitude, k)) +
     ggplot2::coord_cartesian(xlim = k_xlim, ylim = k_ylim) +
     ggplot2::xlab(paste("m (", mag_label, ")", sep = "")) +
-    ggplot2::ylab("k(m)")
+    ggplot2::ylab("k(m)") +
+    # delete this
+    ggplot2::theme(axis.title.x = element_text(size = 20),
+                   axis.title.y = element_text(size = 20),
+                   axis.text = element_text(size = 20))
 
   for (i in 1:(n2-1)){
     trig_k = trig_k + ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
@@ -692,6 +720,8 @@ trig_plots = function(model,
                )) +
     ggplot2::scale_fill_manual(values = c("black", "white")) +
     ggplot2::theme(legend.position = "none")
+  } else {
+    trig_k = NULL
   }
 
   #Space Plot
@@ -726,6 +756,8 @@ trig_plots = function(model,
     ggplot2::scale_fill_manual(values = c("black", "white")) +
     ggplot2::theme(legend.position = "none")
 
+  } else {
+    trig_h = NULL
   }
 
   # if (sum(model$mark_bins) == 0 & sum(model$dist_bins) == 0){
@@ -749,10 +781,12 @@ trig_plots = function(model,
 
   title = cowplot::ggdraw() +
     cowplot::draw_label(plot_title, x = 0, hjust = 0) +
+    ggplot2::theme_set(cowplot::theme_cowplot(font_size=20)) +
     ggplot2::theme(plot.margin = ggplot2::margin(0, 0, 0, 7))
 
-  out = cowplot::plot_grid(title, out, ncol = 1, rel_heights = c(0.1, 1))
-  return(out)
+  out = cowplot::plot_grid(title, out, ncol = 1, rel_heights = c(0.15, 1))
+  return(all_plots = out, time_plot = trig_g,
+         space_plot = trig_h, mark_plot = trig_k)
 }
 
 
@@ -927,16 +961,16 @@ ci_plot = function(model, min_date = model$input$ref_date,
     ggplot2::geom_line(data = ci_one,
                        ggplot2::aes(x = Date, y = n),
                        linetype = "solid") +
-    # ggplot2::theme(axis.title.y=ggplot2::element_blank(),
-    #     legend.position = "right") +
-    #     ggplot2::scale_linetype_manual(name = "Number of \nMonthly Events",
-    #                     labels = c("Observed", "Estimated"),
-    #                     values = c("solid", "dashed")) +
-    ggplot2::ylab("Number of Monthly Events") +
+    ggplot2::theme(axis.title.y=ggplot2::element_blank(),
+        legend.position = "right") +
+        ggplot2::scale_linetype_manual(name = "Number of \nMonthly Events",
+                        labels = c("Observed", "Estimated"),
+                        values = c("solid", "dashed")) +
+    #ggplot2::ylab("Number of Monthly Events") +
     ggplot2::ggtitle(plot_title)
-    # ggplot2::scale_x_date(breaks = seq(
-    #   from = lubridate::year(model$ref_date),
-    #   to = lubridate::year(max)))
-      #labels = lubridate::year(model$ref_date):lubridate::year(max))
+    ggplot2::scale_x_date(breaks = seq(
+      from = lubridate::year(model$ref_date),
+      to = lubridate::year(max)))
+    labels = lubridate::year(model$ref_date):lubridate::year(max)
 }
 

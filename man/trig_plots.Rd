@@ -36,7 +36,15 @@ trig_plots(
 \item{title}{character string for the title of the collection of triggering plots}
 }
 \value{
-histogram estimators for all utilized triggering components
+\code{all_plots} is a cowplot object of histogram estimators for all utilized triggering components
+
+\code{time_plot} is a ggplot object of the histogram estimator for the temporal effect
+
+\code{space_plot} is a ggplot object of the histogram estimator for the spatial effect,
+NULL if data provided is not a spatial process
+
+\code{mark_plot} is a ggplot object of the histogram estimator for the mark effect,
+NULL if data provided is not a marked process
 }
 \description{
 This function exports histogram estimators for all utilized triggering components. Plots show

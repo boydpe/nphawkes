@@ -7,7 +7,10 @@
 se_bars(model)
 }
 \arguments{
-\item{model}{the output from \code{nph()}}
+\item{model}{the output from \code{nph()}
+
+This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+and is used within the function that produces triggering plots.}
 }
 \value{
 a list of variance estimates for all utilized triggering component
