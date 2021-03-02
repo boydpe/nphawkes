@@ -1,5 +1,5 @@
 # Peter Boyd
-# Mass Shooting Functions
+# nphawkes funcions
 
 
 # Rcpp::compileAttributes() #when changing c++ code
@@ -200,6 +200,9 @@ nph <- function(dates, ref_date = min(dates),
                  g, h, k,
                  space_breaks, time_breaks, mark_breaks,
                  br, time_bins, dist_bins, lat)
+    # rounding difference may cause insignificant negatives
+    # replace trace neagtives by 0
+    p = ifelse(p<0, 0, p)
     max_diff = check_p(p0, p)
     p0 = p
     n_iterations = n_iterations + 1
@@ -546,7 +549,6 @@ se_bars = function(model){
   for(i in 2: nrow(model$p0)){
     for(j in 1:(i-1)){
       x_g = model$time_bins[j,i] + 1
-      #should it  be + 1?
       thetag[x_g] = thetag[x_g] + model$p0[i,j]
     }
   }
