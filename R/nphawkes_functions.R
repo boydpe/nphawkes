@@ -776,21 +776,22 @@ trig_plots = function(model,
   #   out = gridExtra::grid.arrange(trig_g, trig_h, trig_k, ncol = 3)
   # }
   if (sum(model$mark_bins) == 0 & sum(model$dist_bins) == 0){
-    out = cowplot::plot_grid(trig_g, ncol = 1)
+    all_plots = cowplot::plot_grid(trig_g, ncol = 1)
   } else if (sum(model$mark_bins) != 0 & sum(model$dist_bins) == 0) {
-    out = cowplot::plot_grid(trig_g, trig_k, ncol = 2)
+    all_plots = cowplot::plot_grid(trig_g, trig_k, ncol = 2)
   } else if (sum(model$mark_bins) == 0 & sum(model$dist_bins) != 0) {
-    out = cowplot::plot_grid(trig_g, trig_h, ncol = 2)
+    all_plots = cowplot::plot_grid(trig_g, trig_h, ncol = 2)
   } else {
-    out = cowplot::plot_grid(trig_g, trig_h, trig_k, ncol = 3)
+    all_plots = cowplot::plot_grid(trig_g, trig_h, trig_k, ncol = 3)
   }
 
-  title = cowplot::ggdraw() +
-    cowplot::draw_label(plot_title, x = 0, hjust = 0) +
-    ggplot2::theme_set(cowplot::theme_cowplot(font_size=20)) +
-    ggplot2::theme(plot.margin = ggplot2::margin(0, 0, 0, 7))
+  # title = cowplot::ggdraw() +
+  #   cowplot::draw_label(plot_title, x = 0, hjust = 0) +
+  #   ggplot2::theme_set(cowplot::theme_cowplot(font_size=20)) +
+  #   ggplot2::theme(plot.margin = ggplot2::margin(0, 0, 0, 7))
 
-  all_plots = cowplot::plot_grid(title, out, ncol = 1, rel_heights = c(0.15, 1))
+  #all_plots = cowplot::plot_grid(title, out, ncol = 1, rel_heights = c(0.15, 1))
+  # all_plots = out
   out = list(all_plots = all_plots, time_plot = trig_g,
          space_plot = trig_h, mark_plot = trig_k)
   return(out)
