@@ -29,11 +29,11 @@ NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix d
       for (int j = 0; j < n_i; j++){
         if  ( j < i){
           num_p = (g[time_bins(j,i)]*h[dist_bins(i,j)] *
-            k[mark_mat[j]]/(2*pi*dist_mat(i,j)));
+            k[mark_mat[j]]); // /(2*pi*dist_mat(i,j)));
 
           for (int  l = 0; l < i; l++){
-            y += g[time_bins(l,i)]*h[dist_bins(i,l)]*k[mark_mat[l]]/
-              (2*pi*dist_mat(i,l));
+            y += g[time_bins(l,i)]*h[dist_bins(i,l)]*k[mark_mat[l]]; // /
+              //(2*pi*dist_mat(i,l));
           }
           den_p = br + y;
           p(i,j) = num_p / den_p;
@@ -43,8 +43,8 @@ NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix d
           num_p = br;
 
           for (int  l = 0; l < i; l++){
-            y += g[time_bins(l,i)]*h[dist_bins(i,l)]*k[mark_mat[l]]/
-              (2*pi*dist_mat(i,l));
+            y += g[time_bins(l,i)]*h[dist_bins(i,l)]*k[mark_mat[l]]; ///
+              //(2*pi*dist_mat(i,l));
           }
           den_p = br + y;
           p(i,j) = num_p / den_p;
