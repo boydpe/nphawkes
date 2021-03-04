@@ -209,16 +209,23 @@ nph <- function(dates, ref_date = min(dates),
     n_iterations = n_iterations + 1
   }
 
-  max_event = c()
+  max_diag = c()
   for ( i in 1:nrow(p0)){
     if (p0[i,i] == max(p0[i,])){
-      max_event[i] = 1
+      max_diag[i] = 1
     } else{
-      max_event[i] = 0
+      max_diag[i] = 0
     }
   }
+  df$mainshock = max_diag
 
-  perc_br = sum(max_event) / length(max_event)
+  max_event = c()
+  for (i in 1:nrow(p0)) {
+    max_event[i] = which.max(p0[i,])
+  }
+  df$parent = max_event
+
+  perc_br = sum(max_diag) / length(max_diag)
   perc_diag = sum(diag(p0)) / nrow(p0)
 
   out = list(p0 = p0, g= g, h = h, k = k, br = br,
