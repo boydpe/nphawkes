@@ -185,7 +185,7 @@ nph <- function(dates, ref_date = min(dates),
               lat_lim[3])
   # calculate radii such that np number of events are within
   # distance d_i
-  di = calc_d(dist_mat2, np = 24)# was doing 24
+  di = calc_d(dist_mat2, np = floor(0.05*n))# was doing 24
 
   # put all events into a pixel
   # select proper br in prob calcs

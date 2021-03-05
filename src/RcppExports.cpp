@@ -200,7 +200,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // update_p
-NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix dist_mat, NumericVector mark_mat, NumericVector g, NumericVector h, NumericVector k, NumericVector space_breaks, NumericVector time_breaks, NumericVector mark_breaks, double br, NumericMatrix time_bins, NumericMatrix dist_bins, NumericVector lat);
+NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix dist_mat, NumericVector mark_mat, NumericVector g, NumericVector h, NumericVector k, NumericVector space_breaks, NumericVector time_breaks, NumericVector mark_breaks, NumericVector br, NumericMatrix time_bins, NumericMatrix dist_bins, NumericVector lat);
 RcppExport SEXP _nphawkes_update_p(SEXP p0SEXP, SEXP time_matSEXP, SEXP dist_matSEXP, SEXP mark_matSEXP, SEXP gSEXP, SEXP hSEXP, SEXP kSEXP, SEXP space_breaksSEXP, SEXP time_breaksSEXP, SEXP mark_breaksSEXP, SEXP brSEXP, SEXP time_binsSEXP, SEXP dist_binsSEXP, SEXP latSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -215,7 +215,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type space_breaks(space_breaksSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type time_breaks(time_breaksSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type mark_breaks(mark_breaksSEXP);
-    Rcpp::traits::input_parameter< double >::type br(brSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type br(brSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type time_bins(time_binsSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type dist_bins(dist_binsSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type lat(latSEXP);
