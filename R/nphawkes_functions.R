@@ -283,8 +283,6 @@ nph <- function(dates, ref_date = min(dates),
   perc_br = sum(max_diag) / length(max_diag)
   perc_diag = sum(diag(p0)) / nrow(p0)
 
-  br = ifelse(nonstat_br == FALSE, br[1], br)
-
   out = list(p0 = p0, g= g, h = h, k = k, br = br,  br_grid = br_grid,
              time_bins = time_bins, mark_bins = mark_mat,
              dist_bins = dist_bins, perc_br = perc_br, perc_diag = perc_diag,
