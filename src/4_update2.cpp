@@ -6,7 +6,7 @@ using namespace Rcpp;
 NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix dist_mat,
                        NumericVector mark_mat, NumericVector g, NumericVector h,
                        NumericVector k, NumericVector space_breaks, NumericVector time_breaks,
-                       NumericVector mark_breaks, double br, NumericMatrix time_bins,
+                       NumericVector mark_breaks, NumericVector br, NumericMatrix time_bins,
                        NumericMatrix dist_bins, NumericVector lat){
 
   int n_i = pow(p0.size(), 0.5);
@@ -35,18 +35,18 @@ NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix d
             y += g[time_bins(l,i)]*h[dist_bins(i,l)]*k[mark_mat[l]]; // /
               //(2*pi*dist_mat(i,l));
           }
-          den_p = br + y;
+          den_p = br[i] + y;
           p(i,j) = num_p / den_p;
           y = 0;
 
         } else if (i == j) {
-          num_p = br;
+          num_p = br[i];
 
           for (int  l = 0; l < i; l++){
             y += g[time_bins(l,i)]*h[dist_bins(i,l)]*k[mark_mat[l]]; ///
               //(2*pi*dist_mat(i,l));
           }
-          den_p = br + y;
+          den_p = br[i] + y;
           p(i,j) = num_p / den_p;
           y = 0;
         } else {
@@ -67,17 +67,17 @@ NumericMatrix update_p(NumericMatrix p0, NumericMatrix time_mat, NumericMatrix d
           for (int  l = 0; l < i; l++){
             y += g[time_bins(l,i)]*h[dist_bins(i,l)]*k[mark_mat[l]];
           }
-          den_p = br +y;
+          den_p = br[i] +y;
           p(i,j) = num_p / den_p;
           y = 0;
 
         }else if (i == j) {
-          num_p = br;
+          num_p = br[i];
 
           for (int  l = 0; l < i; l++){
             y += g[time_bins(l,i)]*h[dist_bins(i,l)]*k[mark_mat[l]];
           }
-          den_p = br + y;
+          den_p = br[i] + y;
           p(i,j) = num_p / den_p;
           y = 0;
         }

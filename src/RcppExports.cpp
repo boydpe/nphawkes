@@ -87,6 +87,79 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_br_nonstat
+NumericMatrix calc_br_nonstat(NumericMatrix p0, NumericVector times, double z, NumericMatrix tau);
+RcppExport SEXP _nphawkes_calc_br_nonstat(SEXP p0SEXP, SEXP timesSEXP, SEXP zSEXP, SEXP tauSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type p0(p0SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type times(timesSEXP);
+    Rcpp::traits::input_parameter< double >::type z(zSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type tau(tauSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_br_nonstat(p0, times, z, tau));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_d
+NumericVector calc_d(NumericMatrix dist_mat2, int np);
+RcppExport SEXP _nphawkes_calc_d(SEXP dist_mat2SEXP, SEXP npSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type dist_mat2(dist_mat2SEXP);
+    Rcpp::traits::input_parameter< int >::type np(npSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_d(dist_mat2, np));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_pix
+NumericVector get_pix(NumericVector x_grid, NumericVector y_grid, NumericVector lat, NumericVector lon, NumericVector x_pix, NumericVector y_pix);
+RcppExport SEXP _nphawkes_get_pix(SEXP x_gridSEXP, SEXP y_gridSEXP, SEXP latSEXP, SEXP lonSEXP, SEXP x_pixSEXP, SEXP y_pixSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x_grid(x_gridSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y_grid(y_gridSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lat(latSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lon(lonSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x_pix(x_pixSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y_pix(y_pixSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_pix(x_grid, y_grid, lat, lon, x_pix, y_pix));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_tau
+NumericMatrix calc_tau(NumericVector x_pix, NumericVector y_pix, NumericMatrix p0, NumericVector di, NumericVector lon, NumericVector lat, NumericVector times);
+RcppExport SEXP _nphawkes_calc_tau(SEXP x_pixSEXP, SEXP y_pixSEXP, SEXP p0SEXP, SEXP diSEXP, SEXP lonSEXP, SEXP latSEXP, SEXP timesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x_pix(x_pixSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y_pix(y_pixSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type p0(p0SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type di(diSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lon(lonSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lat(latSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type times(timesSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_tau(x_pix, y_pix, p0, di, lon, lat, times));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_z
+double calc_z(NumericVector times, NumericVector x_pix, NumericVector y_pix, NumericMatrix tau);
+RcppExport SEXP _nphawkes_calc_z(SEXP timesSEXP, SEXP x_pixSEXP, SEXP y_pixSEXP, SEXP tauSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type times(timesSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x_pix(x_pixSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y_pix(y_pixSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type tau(tauSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_z(times, x_pix, y_pix, tau));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_k
 NumericVector get_k(NumericMatrix p0, NumericVector marks, NumericVector mark_breaks);
 RcppExport SEXP _nphawkes_get_k(SEXP p0SEXP, SEXP marksSEXP, SEXP mark_breaksSEXP) {
@@ -171,6 +244,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_nphawkes_get_time", (DL_FUNC) &_nphawkes_get_time, 1},
     {"_nphawkes_init_p0", (DL_FUNC) &_nphawkes_init_p0, 1},
     {"_nphawkes_calc_br", (DL_FUNC) &_nphawkes_calc_br, 2},
+    {"_nphawkes_calc_br_nonstat", (DL_FUNC) &_nphawkes_calc_br_nonstat, 4},
+    {"_nphawkes_calc_d", (DL_FUNC) &_nphawkes_calc_d, 2},
+    {"_nphawkes_get_pix", (DL_FUNC) &_nphawkes_get_pix, 6},
+    {"_nphawkes_calc_tau", (DL_FUNC) &_nphawkes_calc_tau, 7},
+    {"_nphawkes_calc_z", (DL_FUNC) &_nphawkes_calc_z, 4},
     {"_nphawkes_get_k", (DL_FUNC) &_nphawkes_get_k, 3},
     {"_nphawkes_get_h", (DL_FUNC) &_nphawkes_get_h, 3},
     {"_nphawkes_get_g", (DL_FUNC) &_nphawkes_get_g, 3},

@@ -29,6 +29,26 @@ calc_br <- function(p0, times) {
     .Call('_nphawkes_calc_br', PACKAGE = 'nphawkes', p0, times)
 }
 
+calc_br_nonstat <- function(p0, times, z, tau) {
+    .Call('_nphawkes_calc_br_nonstat', PACKAGE = 'nphawkes', p0, times, z, tau)
+}
+
+calc_d <- function(dist_mat2, np) {
+    .Call('_nphawkes_calc_d', PACKAGE = 'nphawkes', dist_mat2, np)
+}
+
+get_pix <- function(x_grid, y_grid, lat, lon, x_pix, y_pix) {
+    .Call('_nphawkes_get_pix', PACKAGE = 'nphawkes', x_grid, y_grid, lat, lon, x_pix, y_pix)
+}
+
+calc_tau <- function(x_pix, y_pix, p0, di, lon, lat, times) {
+    .Call('_nphawkes_calc_tau', PACKAGE = 'nphawkes', x_pix, y_pix, p0, di, lon, lat, times)
+}
+
+calc_z <- function(times, x_pix, y_pix, tau) {
+    .Call('_nphawkes_calc_z', PACKAGE = 'nphawkes', times, x_pix, y_pix, tau)
+}
+
 get_k <- function(p0, marks, mark_breaks) {
     .Call('_nphawkes_get_k', PACKAGE = 'nphawkes', p0, marks, mark_breaks)
 }

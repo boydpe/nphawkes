@@ -82,6 +82,9 @@ nph <- function(dates, ref_date = min(dates),
                 g_length = 6, stopwhen = 1e-3,
                 time_of_day = NA,
                 just_times = FALSE,
+                nonstat_br = FALSE,
+                lon_lim = c(min(lon), max(lon), (max(lon) - min(lon))/10),
+                lat_lim = c(min(lat), max(lat), (max(lat) - min(lat))/10),
                 time_unit = "day", dist_unit = "mile"){
 
   # create times from dates
@@ -109,7 +112,6 @@ nph <- function(dates, ref_date = min(dates),
   } else {
     times = dates
   }
-
   df$times = times
   df = df[order(df$times),]
   df = df[which(df$times > 0),]
@@ -144,6 +146,9 @@ nph <- function(dates, ref_date = min(dates),
     }
   }
 
+  #diag(dist_mat) = 0
+  #dist_mat[upper.tri(dist_mat)] = t(dist_mat)[upper.tri(dist_mat)]
+
 
   # convert distances to correct units
   if (dist_unit == "mile") {
@@ -153,6 +158,40 @@ nph <- function(dates, ref_date = min(dates),
   } else {
     dist_mat = dist_mat
   }
+
+  # sort distances. easier computation of number of
+  # points for nonstationary background rate
+  dist_mat2 = matrix(data = NA, nrow = n, ncol = n)
+  for (i in 1:n){
+    dist_mat2[i,] = sort(dist_mat[i,])
+  }
+  # FIX THIS LATER
+  if(sum(lat) != 0) {
+    dist_mat = ifelse(dist_mat == 0, 0.0001, dist_mat)
+  }
+  # THREE: nonstationary background rate
+  diag(dist_mat) = 0
+
+  # create spatial grid to contain events
+  # ADD IF STATEMENT HERE
+  x_grid = seq(lon_lim[1], lon_lim[2], lon_lim[3])
+  y_grid = seq(lat_lim[1], lat_lim[2], lat_lim[3])
+  # grid is entire window, pix is midpoints of grid
+  x_pix = seq(lon_lim[1] + lon_lim[3]*0.5,
+              lon_lim[2] - lon_lim[3]*0.5,
+              lon_lim[3])
+  y_pix = seq(lat_lim[1] + lat_lim[3]*0.5,
+              lat_lim[2] - lat_lim[3]*0.5,
+              lat_lim[3])
+  # calculate radii such that np number of events are within
+  # distance d_i
+  di = calc_d(dist_mat2, np = 24)# was doing 24
+
+  # put all events into a pixel
+  # select proper br in prob calcs
+  pix = get_pix(x_grid, y_grid, lat, lon, x_pix, y_pix)
+  pix = data.frame(pix)
+  names(pix) = c("lon", "lat")
 
   # implement option of bin by quantile
   if(time_quantile == TRUE){
@@ -192,7 +231,23 @@ nph <- function(dates, ref_date = min(dates),
   n_iterations = 0
 
   while( max_diff > stopwhen){
-    br = calc_br(p0, times)
+    if(nonstat_br == TRUE) {
+      tau = calc_tau(x_pix, y_pix, p0, di,
+                     lon, lat, times)
+      z = sum(tau[,1] * diff(x_pix)[1] * diff(y_pix)[1] * ceiling(max(times)))
+      br = calc_br_nonstat(p0, times, z, tau)
+
+      br_grid = data.frame(br)
+      names(br_grid) = c("br", "lon", "lat")
+
+      locs = dplyr::left_join(pix, br_grid, by = c("lon", "lat"))
+      locs$br = ifelse(is.na(locs$br) == TRUE, 0, locs$br)
+      br = as.vector(locs$br)
+    } else {
+      br = calc_br(p0, times)
+      br = rep(br, n)
+      br_grid = NA
+    }
     g_vals = get_g(p0, time_breaks, time_mat)
     g = g_vals[,1] / g_vals[,2]
     h = get_h(p0, space_breaks, dist_mat)
@@ -228,12 +283,14 @@ nph <- function(dates, ref_date = min(dates),
   perc_br = sum(max_diag) / length(max_diag)
   perc_diag = sum(diag(p0)) / nrow(p0)
 
-  out = list(p0 = p0, g= g, h = h, k = k, br = br,
+  br = ifelse(nonstat_br = FALSE, br = br[1], br)
+
+  out = list(p0 = p0, g= g, h = h, k = k, br = br,  br_grid = br_grid,
              time_bins = time_bins, mark_bins = mark_mat,
              dist_bins = dist_bins, perc_br = perc_br, perc_diag = perc_diag,
              time_breaks = time_breaks, mark_breaks = mark_breaks, space_breaks = space_breaks, data = df,
              ref_date = ref_date, n_iterations = n_iterations,
-             input =   mget(names(formals()),sys.frame(sys.nframe())))
+             input = mget(names(formals()),sys.frame(sys.nframe())))
   return(out)
 }
 

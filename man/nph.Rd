@@ -22,6 +22,9 @@ nph(
   stopwhen = 0.001,
   time_of_day = NA,
   just_times = FALSE,
+  nonstat_br = FALSE,
+  lon_lim = c(min(lon), max(lon), (max(lon) - min(lon))/10),
+  lat_lim = c(min(lat), max(lat), (max(lat) - min(lat))/10),
   time_unit = "day",
   dist_unit = "mile"
 )
