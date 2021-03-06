@@ -438,13 +438,28 @@ cond_int = function(model) {
 #' @param region name of subregion to include, defaults to entirety of map
 #' @param sim_grid TRUE if geographical coordinates do not necessarily pertain to
 #' certain area, such as 0x1 by 0x1 grid, FALSE if using specific region or not using spatial information
-#' @param lat_bounds vector containing minimum and maximum latitude bounds if sim_grid is TRUE
-#' @param lon_bounds vector containing minimum and maximum longitude bounds if sim_gird is TRUE
+#' @param lat_lim vector containing minimum and maximum latitude bounds if sim_grid is TRUE
+#' @param lon_lim vector containing minimum and maximum longitude bounds if sim_gird is TRUE
 #'
 #' @return a data frame which includes the time, location, and estimated conditional intensity of events.
 #' The type of event, either observed or simulated, is noted along with the probability that the event was kept
 #' and whether or not the point was in fact retained.
 #'
+#' @examples
+#' data("hm.csv")
+#' out = nph(dates = hm$t,
+#'    ref_date = "1999-10-16",
+#'    lat = hm$lat,
+#'    lon = hm$lon,
+#'    marks = hm$m,
+#'    time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+#'    space_breaks = c(0,0.5, 1, 10, 25, 100),
+#'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+#'    just_times = T)
+#' st = super_thin(K "median_ci",
+#'     model = out,
+#'     method = "superthin",
+#'     )
 #'
 #' @export
 
@@ -452,6 +467,8 @@ super_thin = function(K = "median_ci",
                       model, method = "superthin",
                       map = world, region = ".",
                       sim_grid = TRUE,
+                      lat_lim = model$input$lat_lim,
+                      lon_lim = model$input$lon_lim,
                       lat_bounds = c(min(model$data$lat), max(model$data$lat)),
                       lon_bounds = c(min(model$data$lon), max(model$data$lon))) {
 
@@ -529,8 +546,8 @@ super_thin = function(K = "median_ci",
     sim_pp = cbind(sim_pp, lat = rep(0, n2), lon = rep(0, n2))
   } else{
     if (sim_grid == TRUE) {
-      sim_lat = runif(n2, min = lat_bounds[1], max = lat_bounds[2])
-      sim_lon = runif(n2, min = lon_bounds[1], max = lon_bounds[2])
+      sim_lat = runif(n2, min = lat_lim[1], max = lat_lim[2])
+      sim_lon = runif(n2, min = lon_lim[1], max = lon_lim[2])
       sim_pp = cbind(sim_pp, lat = sim_lat, lon = sim_lon)
     } else {
       region = ggplot2::map_data(maps::map(), region = region)
