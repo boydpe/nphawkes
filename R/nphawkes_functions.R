@@ -18,6 +18,16 @@
 #' process in temporal or spatio-temporal domain, with or without marks
 #' through the Model independent stochastic declustering algorithm.
 #'
+#' This function can only be applied to data that contains a temporal feature. It can also be applied to data
+#' consisting of time and space, time and marks, or time and space and marks.
+#'
+#' For each triggering component used (time, space, marks), a binning structure will be applied. The user may define
+#' these right continuous bins as a vector (\code{c(1,5,10)} creates two bins for \eqn{1 < x \le 5}, and \eqn{5 < x \le 10}),
+#' or n time bins may be generated automatically by specifying \code{time_quantile = n}, with the same applying for marks and space.
+#' This method will establish breaks such that the allocation of time differences within the data will be roughly
+#' equal in each created bin. Uniform binning methods may unattainable for discrete marks containing many replicates of values.
+#'
+#' If no time of day is provided, events will be randomly assigned a time during the event's date.
 #'
 #' @param dates a vector of dates as "yyyy-mm-dd".
 #' @param lat a vector of latitudes, omit if not using spatial data
@@ -26,12 +36,12 @@
 #' @param time_breaks a vector of cutoff values for temporal bins of time differences
 #' @param space_breaks a vector of cutoff values for spatial bins of distance differences
 #' @param mark_breaks a vector of cutoff values for magnitude bins
-#' @param time_quantile FALSE by default to use defined temporal bins, TRUE to establish uniform bins
-#' @param g_length a scalar to define the number of desired uniform temporal bins
-#' @param space_quantile FALSE by default to use defined spatial bins, TRUE to establish uniform bins
-#' @param h_length a scalar to define the number of desired unifrom spatial bins
-#' @param mark_quantile FALSE by default to use defined magnitude bins, TRUE to establish uniform bins
-#' @param k_length a scalar to define the number of desired magnitude bins
+#' @param time_quantile NA by default to use defined temporal bins, integer \code{n} value will
+#' establish n time bins containing roughly equal number of pairwise time differences
+#' @param space_quantile NA by default to use defined spatial bins, integer \code{n} value will
+#' establish n spatial bins containing roughly equal number of pairwise spatial differences
+#' @param mark_quantile NA by default to use defined magnitude bins, integer \code{n} value will
+#' establish n mark bins containing roughly equal number of events
 #' @param ref_date a date to serve as time 0, defaults to earliest observation
 #' @param time_of_day character string that lists the time of day of events, as hour:minute:second
 #' @param just_time TRUE or FALSE object. TRUE if \code{dates} object is a vector of only times,
@@ -39,19 +49,6 @@
 #' @param time_unit character string that specifies the desired unit of time
 #' @param dist_unit character string that specifies the desired unit of distance: meter, kilometer, or mile
 #' @param stop_when scalar that serves as conversion criterion, 1e-3 as default
-#'
-#' This function can only be applied to data that contains a temporal feature. It can also be applied to data
-#' consisting of time and space, time and marks, or time and space and marks.
-#'
-#' For each triggering component used (time, space, marks), a binning structure will be applied. The user may define
-#' these right continuous bins as a vector ([c(1,5,10)] creates two bins for 1 < x \leq 5, and 5 < x \leq 10),
-#' or may be generated automatically by specifying \code{time_breaks = TRUE}, with the same applying for marks and space.
-#' This method will establish breaks such that the allocation of time differences within the data will be roughly
-#' equal in each created bin. Further specifying \code{g_length} will control the number of bins established, with the
-#' default producing 6 bins. Uniform binning methods may unattainable for discrete marks containing many replicates of values.
-#'
-#' If no time of day is provided, events will be randomly assigned a time during the event's date.
-#'
 #'
 #' @return Probability matrix \code{p0} containing the probabilities that event
 #' \code{i} is an offspring of event \code{j}, \code{i > j}. Diagonal elements
@@ -68,6 +65,29 @@
 #' @return \code{mark_bins} is a vector containing the magnitude bin of each event
 #' @return \code{n_iterations} is the number of iterations executed until convergence
 #' @return \code{input} is a list of all inputs
+#'
+#' @examples
+#' data("hm.csv")
+#' out = nph(dates = hm$t,
+#'    ref_date = "1999-10-16",
+#'    lat = hm$lat,
+#'    lon = hm$lon,
+#'    marks = hm$m,
+#'    time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+#'    space_breaks = c(0,0.5, 1, 10, 25, 100),
+#'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+#'    just_times = T)
+#'
+#'  out1 = nph(dates = hm$t,
+#'    ref_date = "1999-10-16",
+#'    lat = hm$lat,
+#'    lon = hm$lon,
+#'    marks = hm$m,
+#'    time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+#'    space_quantile = 7,
+#'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+#'    just_times = T,
+#'    nonstat_br = T)
 
 
 #' @export
@@ -76,13 +96,10 @@ nph <- function(dates, ref_date = min(dates),
                 lon = rep(0, length(dates)),
                 marks = rep(0, length(dates)),
                 time_breaks = c(0,1), space_breaks = c(0,1),
-                mark_breaks = c(0,1), time_quantile = FALSE,
-                mark_quantile = FALSE, space_quantile = FALSE,
-                k_length = 6, h_length = 6,
-                g_length = 6, stopwhen = 1e-3,
-                time_of_day = NA,
-                just_times = FALSE,
-                nonstat_br = FALSE,
+                mark_breaks = c(0,1), time_quantile = NA,
+                mark_quantile = NA, space_quantile = NA,
+                stopwhen = 1e-3, time_of_day = NA,
+                just_times = FALSE, nonstat_br = FALSE,
                 lon_lim = c(min(lon), max(lon), (max(lon) - min(lon))/10),
                 lat_lim = c(min(lat), max(lat), (max(lat) - min(lat))/10),
                 time_unit = "day", dist_unit = "mile"){
@@ -194,27 +211,27 @@ nph <- function(dates, ref_date = min(dates),
   names(pix) = c("lon", "lat")
 
   # implement option of bin by quantile
-  if(time_quantile == TRUE){
+  if(is.na(time_quantile) == FALSE){
     time_mat1 = time_mat
     time_mat1[lower.tri(time_mat1, diag = TRUE)] = NA
     time_breaks = as.vector(quantile(time_mat1, na.rm = TRUE,
-                                probs = seq(0,1, length.out= g_length + 1)))
+                                probs = seq(0,1, length.out= time_quantile + 1)))
     time_breaks[length(time_breaks)] = time_breaks[length(time_breaks)] + 1
     time_breaks[1] = 0
   } else {time_breaks = time_breaks}
 
-  if(mark_quantile == TRUE){
+  if(is.(mark_quantile) == FALSE){
     mark_breaks = unique(as.vector(quantile(marks,
-                                       probs = seq(0, 1, length.out = k_length + 1))))
+                                       probs = seq(0, 1, length.out = mark_quantile + 1))))
     mark_breaks[length(mark_breaks)] = mark_breaks[length(mark_breaks)] + 1
     mark_breaks[1] = 0 # accounts for simulating points below lowest bin
   } else {mark_breaks = mark_breaks}
 
-  if(space_quantile == TRUE){
+  if(is.na(space_quantile) == FALSE){
     dist_mat1 = dist_mat
     dist_mat1[lower.tri(dist_mat1, diag = TRUE)] = NA
     space_breaks = as.vector(quantile(dist_mat1, na.rm = TRUE,
-                                probs = seq(0,1, length.out= h_length + 1)))
+                                probs = seq(0,1, length.out= space_quantile + 1)))
     space_breaks[length(space_breaks)] = space_breaks[length(space_breaks)] + 1
     space_breaks[1] = 0
   } else {space_breaks = space_breaks}
@@ -300,12 +317,30 @@ nph <- function(dates, ref_date = min(dates),
 #'
 #' This function estimates the conditional intensity function of the observed process.
 #'
+#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+#' Using the output from the \code{nph()} function. The exported data frame will contain, for each event,
+#' the time elapsed (in days) since the beginning of the observation window, the date of the event,
+#' the conditional intensity at the event's location in time (or space-time), as well as the
+#' coordinates and marks (if provided).
+#'
 #' @param model the output from \code{nph()}
 #'
-#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
-#' Using the output from the \code{nph()} function,
-#'
 #' @return a data frame containing the time, location, marks, and estimated conditional intensity
+#'
+#' @examples
+#' data("hm.csv")
+#' out = nph(dates = hm$t,
+#'    ref_date = "1999-10-16",
+#'    lat = hm$lat,
+#'    lon = hm$lon,
+#'    marks = hm$m,
+#'    time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+#'    space_breaks = c(0,0.5, 1, 10, 25, 100),
+#'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+#'    just_times = T)
+#'
+#' ci = cond_int(out)
+#'
 #' @export
 cond_int = function(model) {
 
@@ -371,11 +406,12 @@ cond_int = function(model) {
   br = model$br
   # get br and conditional intensity
   for (i in 2:n) {
-    cond_int[i] = br + sum(trig[i, ])
+    cond_int[i] = br[i] + sum(trig[i, ])
   }
 
   ci = data.frame(times, lat, lon, marks, cond_int)
-  ci$Date = as.Date(model$ref_date + ci$times)
+  ci$dates = lubridate::ymd(model$ref_date) +
+    lubridate::days(floor(ci$times))
   return(ci)
 }
 
@@ -386,6 +422,12 @@ cond_int = function(model) {
 #' This function performs super-thinning to assess model fit. Thinning only can be executed by
 #' simply considering events of type "thin" or "retain", while superpositioning only can be executed
 #' by simply treating "thinned" points as "retained".
+#'
+#' #' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+#'
+#' To simulate spatial data, the user may define the \code{map} and \code{region} to easily simulate points within
+#' set political borders. Otherwise, simulated points may be established when \code{sim_grid = TRUE}.
+#'
 #'
 #' @param K a constant or character string that governs the amount of thinning and
 #' superposing that is implemented. Can be a constant value, the median, mean, minimum, or maximum
@@ -399,17 +441,13 @@ cond_int = function(model) {
 #' @param lat_bounds vector containing minimum and maximum latitude bounds if sim_grid is TRUE
 #' @param lon_bounds vector containing minimum and maximum longitude bounds if sim_gird is TRUE
 #'
-#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
-#'
-#' To simulate spatial data, the user may define the \code{map} and \code{region} to easily simulate points within
-#' set political borders. Otherwise, simulated points may be established when \code{sim_grid = TRUE}.
-#'
-#' The parameter \code{K}
-#'
 #' @return a data frame which includes the time, location, and estimated conditional intensity of events.
 #' The type of event, either observed or simulated, is noted along with the probability that the event was kept
-#' and wheter or not the point was in fact retained.
+#' and whether or not the point was in fact retained.
+#'
+#'
 #' @export
+
 super_thin = function(K = "median_ci",
                       model, method = "superthin",
                       map = world, region = ".",
@@ -487,12 +525,12 @@ super_thin = function(K = "median_ci",
   rate = (mean(marks) - min(marks))^(-1)
   sim_pp$marks = round(rexp(n2, rate)) + min(marks)
   # not actually using simulated marks
-  if (sum(model$lat) == 0) {
+  if (sum(model$data$lat) == 0) {
     sim_pp = cbind(sim_pp, lat = rep(0, n2), lon = rep(0, n2))
   } else{
     if (sim_grid == TRUE) {
       sim_lat = runif(n2, min = lat_bounds[1], max = lat_bounds[2])
-      sim_lon = runif(n2, min = lon_bounds[1], max = lat_bounds[2])
+      sim_lon = runif(n2, min = lon_bounds[1], max = lon_bounds[2])
       sim_pp = cbind(sim_pp, lat = sim_lat, lon = sim_lon)
     } else {
       region = ggplot2::map_data(maps::map(), region = region)
@@ -521,7 +559,28 @@ super_thin = function(K = "median_ci",
 
 
   cond_int_sim = c()
-  br = model$br
+  #br = model$br
+  if(model$input$nonstat_br == TRUE) {
+    x_grid = seq(model$input$lon_lim[1], model$input$lon_lim[2], model$input$lon_lim[3])
+    y_grid = seq(model$input$lat_lim[1], model$input$lat_lim[2], model$input$lat_lim[3])
+    # grid is entire window, pix is midpoints of grid
+    x_pix = seq(model$input$lon_lim[1] + model$input$lon_lim[3]*0.5,
+                model$input$lon_lim[2] - model$input$lon_lim[3]*0.5,
+                model$input$lon_lim[3])
+    y_pix = seq(model$input$lat_lim[1] + model$input$lat_lim[3]*0.5,
+                model$input$lat_lim[2] - model$input$lat_lim[3]*0.5,
+                model$input$lat_lim[3])
+
+    pix = get_pix(x_grid, y_grid, sim_pp$lat, sim_pp$lon, x_pix, y_pix)
+    pix = data.frame(pix)
+    names(pix) = c("lon", "lat")
+
+    locs = dplyr::left_join(pix, model$br_grid, by = c("lon", "lat"))
+    locs$br = ifelse(is.na(locs$br) == TRUE, 0, locs$br)
+    br = as.vector(locs$br)
+  } else {
+    br = rep(model$br[1], n2)
+  }
 
   if(sum(sim_pp$lat) == 0){
     sim_pp$lat = rep(1,n2)
@@ -529,19 +588,55 @@ super_thin = function(K = "median_ci",
     sim_pp$lat = sim_pp$lat
   }
 
+  dist_mat = matrix(data = NA, nrow = n2, ncol = n2)
+  R = 6371e3
+
+  for (i in 1:n2) {
+    for (j in 1:n2) {
+      phi1 = sim_pp$lat[i] * pi / 180
+      phi2 = sim_pp$lat[j] * pi / 180
+      latdiff = (sim_pp$lat[j] - sim_pp$lat[i]) * pi / 180
+      londiff = (sim_pp$lon[j] - sim_pp$lon[i]) * pi / 180
+
+      a = sin(latdiff / 2) * sin(latdiff / 2) +
+        cos(phi1) * cos(phi2) * sin(londiff / 2) * sin(londiff / 2)
+      b = 2 * atan2(sqrt(a), sqrt(1 - a))
+      d = R * b
+
+      dist_mat[i, j] = d
+    }
+  }
+
+  #diag(dist_mat) = 0
+  #dist_mat[upper.tri(dist_mat)] = t(dist_mat)[upper.tri(dist_mat)]
+
+
+  # convert distances to correct units
+  if (model$input$dist_unit == "mile") {
+    dist_mat = dist_mat*0.000621371
+  } else if (model$input$dist_unit == "kilometer") {
+    dist_mat = dist_mat*0.001
+  } else {
+    dist_mat = dist_mat
+  }
+
+  data_pp$marks = ifelse(data_pp$marks == mark_breaks[1],
+                         data_pp$marks + 0.0001, data_pp$marks)
+
   for (i in 1:n2) {
     sim_trig = 0
     # get triggering component for each
     for (j in 1:(sim_pp$row1[i])){
       td = sim_pp$Time[i] - data_pp$Time[j]
+      td = ifelse(td == 0, 0.00001, td)
       gb = bin_f(td, time_breaks)
       gg = model$g[gb]
 
       kb = bin_f(data_pp$marks[j], mark_breaks)
       kk = model$k[kb]
 
-      hd = (sim_pp$lat[i] - data_pp$lat[j])^2 +
-        (sim_pp$lon[i] - data_pp$lon[j])^2
+      hd = dist_mat[i,j]
+      hd = ifelse(hd == 0, 0.00001, hd)
       hb = bin_f(hd, space_breaks)
       hh = model$h[hb]
 
@@ -550,7 +645,7 @@ super_thin = function(K = "median_ci",
     }
 
     # get ci for each then remove the simulated point and correct row numbers
-    cond_int_sim[i] = br + sim_trig
+    cond_int_sim[i] = br[i] + sim_trig
   }
 
   # FOURTH: THIN SIMULATED DATA
@@ -561,7 +656,8 @@ super_thin = function(K = "median_ci",
                    keep = NA, type = NA, marks = sim_pp$marks)
   # simulated data
   ci_sim$type = "sim"
-  ci_sim$Date = as.Date(model$ref_date + ci_sim$times)
+  ci_sim$dates = lubridate::ymd(model$ref_date) +
+    lubridate::days(floor(ci_sim$times))
   for(i in 1:nrow(ci_sim)){
     ci_sim$p[i] = max((K - cond_int_sim[i])/K, 0)
     ci_sim$keep[i] = rbinom(1,1,ci_sim$p[i])

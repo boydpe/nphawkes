@@ -33,22 +33,21 @@ certain area, such as 0x1 by 0x1 grid, FALSE if using specific region or not usi
 
 \item{lat_bounds}{vector containing minimum and maximum latitude bounds if sim_grid is TRUE}
 
-\item{lon_bounds}{vector containing minimum and maximum longitude bounds if sim_gird is TRUE
-
-This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
-
-To simulate spatial data, the user may define the \code{map} and \code{region} to easily simulate points within
-set political borders. Otherwise, simulated points may be established when \code{sim_grid = TRUE}.
-
-The parameter \code{K}}
+\item{lon_bounds}{vector containing minimum and maximum longitude bounds if sim_gird is TRUE}
 }
 \value{
 a data frame which includes the time, location, and estimated conditional intensity of events.
 The type of event, either observed or simulated, is noted along with the probability that the event was kept
-and wheter or not the point was in fact retained.
+and whether or not the point was in fact retained.
 }
 \description{
 This function performs super-thinning to assess model fit. Thinning only can be executed by
 simply considering events of type "thin" or "retain", while superpositioning only can be executed
 by simply treating "thinned" points as "retained".
+}
+\details{
+#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+
+To simulate spatial data, the user may define the \code{map} and \code{region} to easily simulate points within
+set political borders. Otherwise, simulated points may be established when \code{sim_grid = TRUE}.
 }

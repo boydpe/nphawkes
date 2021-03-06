@@ -7,14 +7,33 @@
 cond_int(model)
 }
 \arguments{
-\item{model}{the output from \code{nph()}
-
-This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
-Using the output from the \code{nph()} function,}
+\item{model}{the output from \code{nph()}}
 }
 \value{
 a data frame containing the time, location, marks, and estimated conditional intensity
 }
 \description{
 This function estimates the conditional intensity function of the observed process.
+}
+\details{
+This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+Using the output from the \code{nph()} function. The exported data frame will contain, for each event,
+the time elapsed (in days) since the beginning of the observation window, the date of the event,
+the conditional intensity at the event's location in time (or space-time), as well as the
+coordinates and marks (if provided).
+}
+\examples{
+data("hm.csv")
+out = nph(dates = hm$t,
+   ref_date = "1999-10-16",
+   lat = hm$lat,
+   lon = hm$lon,
+   marks = hm$m,
+   time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+   space_breaks = c(0,0.5, 1, 10, 25, 100),
+   mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+   just_times = T)
+
+ci = cond_int(out)
+
 }

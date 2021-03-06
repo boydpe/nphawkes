@@ -13,12 +13,9 @@ nph(
   time_breaks = c(0, 1),
   space_breaks = c(0, 1),
   mark_breaks = c(0, 1),
-  time_quantile = FALSE,
-  mark_quantile = FALSE,
-  space_quantile = FALSE,
-  k_length = 6,
-  h_length = 6,
-  g_length = 6,
+  time_quantile = NA,
+  mark_quantile = NA,
+  space_quantile = NA,
   stopwhen = 0.001,
   time_of_day = NA,
   just_times = FALSE,
@@ -46,17 +43,14 @@ nph(
 
 \item{mark_breaks}{a vector of cutoff values for magnitude bins}
 
-\item{time_quantile}{FALSE by default to use defined temporal bins, TRUE to establish uniform bins}
+\item{time_quantile}{NA by default to use defined temporal bins, integer \code{n} value will
+establish n time bins containing roughly equal number of pairwise time differences}
 
-\item{mark_quantile}{FALSE by default to use defined magnitude bins, TRUE to establish uniform bins}
+\item{mark_quantile}{NA by default to use defined magnitude bins, integer \code{n} value will
+establish n mark bins containing roughly equal number of events}
 
-\item{space_quantile}{FALSE by default to use defined spatial bins, TRUE to establish uniform bins}
-
-\item{k_length}{a scalar to define the number of desired magnitude bins}
-
-\item{h_length}{a scalar to define the number of desired unifrom spatial bins}
-
-\item{g_length}{a scalar to define the number of desired uniform temporal bins}
+\item{space_quantile}{NA by default to use defined spatial bins, integer \code{n} value will
+establish n spatial bins containing roughly equal number of pairwise spatial differences}
 
 \item{time_of_day}{character string that lists the time of day of events, as hour:minute:second}
 
@@ -67,19 +61,7 @@ nph(
 \item{just_time}{TRUE or FALSE object. TRUE if \code{dates} object is a vector of only times,
 indicating time elapsed since beginning of catalog.}
 
-\item{stop_when}{scalar that serves as conversion criterion, 1e-3 as default
-
-This function can only be applied to data that contains a temporal feature. It can also be applied to data
-consisting of time and space, time and marks, or time and space and marks.
-
-For each triggering component used (time, space, marks), a binning structure will be applied. The user may define
-these right continuous bins as a vector ([c(1,5,10)] creates two bins for 1 < x \leq 5, and 5 < x \leq 10),
-or may be generated automatically by specifying \code{time_breaks = TRUE}, with the same applying for marks and space.
-This method will establish breaks such that the allocation of time differences within the data will be roughly
-equal in each created bin. Further specifying \code{g_length} will control the number of bins established, with the
-default producing 6 bins. Uniform binning methods may unattainable for discrete marks containing many replicates of values.
-
-If no time of day is provided, events will be randomly assigned a time during the event's date.}
+\item{stop_when}{scalar that serves as conversion criterion, 1e-3 as default}
 }
 \value{
 Probability matrix \code{p0} containing the probabilities that event
@@ -113,4 +95,39 @@ is as a background event
 This function uses nonparametric procedures to analyze a Hawkes
 process in temporal or spatio-temporal domain, with or without marks
 through the Model independent stochastic declustering algorithm.
+}
+\details{
+This function can only be applied to data that contains a temporal feature. It can also be applied to data
+consisting of time and space, time and marks, or time and space and marks.
+
+For each triggering component used (time, space, marks), a binning structure will be applied. The user may define
+these right continuous bins as a vector (\code{c(1,5,10)} creates two bins for \eqn{1 < x \le 5}, and \eqn{5 < x \le 10}),
+or n time bins may be generated automatically by specifying \code{time_quantile = n}, with the same applying for marks and space.
+This method will establish breaks such that the allocation of time differences within the data will be roughly
+equal in each created bin. Uniform binning methods may unattainable for discrete marks containing many replicates of values.
+
+If no time of day is provided, events will be randomly assigned a time during the event's date.
+}
+\examples{
+data("hm.csv")
+out = nph(dates = hm$t,
+   ref_date = "1999-10-16",
+   lat = hm$lat,
+   lon = hm$lon,
+   marks = hm$m,
+   time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+   space_breaks = c(0,0.5, 1, 10, 25, 100),
+   mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+   just_times = T)
+
+ out1 = nph(dates = hm$t,
+   ref_date = "1999-10-16",
+   lat = hm$lat,
+   lon = hm$lon,
+   marks = hm$m,
+   time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+   space_quantile = 7,
+   mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+   just_times = T,
+   nonstat_br = T)
 }
