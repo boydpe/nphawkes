@@ -11,6 +11,8 @@ super_thin(
   map = world,
   region = ".",
   sim_grid = TRUE,
+  lat_lim = model$input$lat_lim,
+  lon_lim = model$input$lon_lim,
   lat_bounds = c(min(model$data$lat), max(model$data$lat)),
   lon_bounds = c(min(model$data$lon), max(model$data$lon))
 )
@@ -31,9 +33,9 @@ superposing that is implemented. Can be a constant value, the median, mean, mini
 \item{sim_grid}{TRUE if geographical coordinates do not necessarily pertain to
 certain area, such as 0x1 by 0x1 grid, FALSE if using specific region or not using spatial information}
 
-\item{lat_bounds}{vector containing minimum and maximum latitude bounds if sim_grid is TRUE}
+\item{lat_lim}{vector containing minimum and maximum latitude bounds if sim_grid is TRUE}
 
-\item{lon_bounds}{vector containing minimum and maximum longitude bounds if sim_gird is TRUE}
+\item{lon_lim}{vector containing minimum and maximum longitude bounds if sim_gird is TRUE}
 }
 \value{
 a data frame which includes the time, location, and estimated conditional intensity of events.
@@ -46,8 +48,27 @@ simply considering events of type "thin" or "retain", while superpositioning onl
 by simply treating "thinned" points as "retained".
 }
 \details{
-#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
 
 To simulate spatial data, the user may define the \code{map} and \code{region} to easily simulate points within
-set political borders. Otherwise, simulated points may be established when \code{sim_grid = TRUE}.
+set political borders. This feature is not quite implementable, but may be soon.
+Otherwise, simulated points may be established when \code{sim_grid = TRUE}, based on minimum and maximum observed
+latitude and longitude coordinates.
+}
+\examples{
+data("hm.csv")
+out = nph(dates = hm$t,
+   ref_date = "1999-10-16",
+   lat = hm$lat,
+   lon = hm$lon,
+   marks = hm$m,
+   time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+   space_breaks = c(0,0.5, 1, 10, 25, 100),
+   mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+   just_times = T)
+st = super_thin(K "median_ci",
+    model = out,
+    method = "superthin",
+    )
+
 }

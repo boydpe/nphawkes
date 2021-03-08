@@ -163,10 +163,6 @@ nph <- function(dates, ref_date = min(dates),
     }
   }
 
-  #diag(dist_mat) = 0
-  #dist_mat[upper.tri(dist_mat)] = t(dist_mat)[upper.tri(dist_mat)]
-
-
   # convert distances to correct units
   if (dist_unit == "mile") {
     dist_mat = dist_mat*0.000621371
@@ -182,15 +178,15 @@ nph <- function(dates, ref_date = min(dates),
   for (i in 1:n){
     dist_mat2[i,] = sort(dist_mat[i,])
   }
-  # FIX THIS LATER
+
   if(sum(lat) != 0) {
     dist_mat = ifelse(dist_mat == 0, 0.0001, dist_mat)
   }
+
   # THREE: nonstationary background rate
   diag(dist_mat) = 0
 
   # create spatial grid to contain events
-  # ADD IF STATEMENT HERE
   x_grid = seq(lon_lim[1], lon_lim[2], lon_lim[3])
   y_grid = seq(lat_lim[1], lat_lim[2], lat_lim[3])
   # grid is entire window, pix is midpoints of grid
@@ -200,6 +196,7 @@ nph <- function(dates, ref_date = min(dates),
   y_pix = seq(lat_lim[1] + lat_lim[3]*0.5,
               lat_lim[2] - lat_lim[3]*0.5,
               lat_lim[3])
+
   # calculate radii such that np number of events are within
   # distance d_i
   di = calc_d(dist_mat2, np = floor(0.05*n))# was doing 24
@@ -423,10 +420,12 @@ cond_int = function(model) {
 #' simply considering events of type "thin" or "retain", while superpositioning only can be executed
 #' by simply treating "thinned" points as "retained".
 #'
-#' #' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
 #'
 #' To simulate spatial data, the user may define the \code{map} and \code{region} to easily simulate points within
-#' set political borders. Otherwise, simulated points may be established when \code{sim_grid = TRUE}.
+#' set political borders. This feature is not quite implementable, but may be soon.
+#' Otherwise, simulated points may be established when \code{sim_grid = TRUE}, based on minimum and maximum observed
+#' latitude and longitude coordinates.
 #'
 #'
 #' @param K a constant or character string that governs the amount of thinning and
@@ -576,7 +575,6 @@ super_thin = function(K = "median_ci",
 
 
   cond_int_sim = c()
-  #br = model$br
   if(model$input$nonstat_br == TRUE) {
     x_grid = seq(model$input$lon_lim[1], model$input$lon_lim[2], model$input$lon_lim[3])
     y_grid = seq(model$input$lat_lim[1], model$input$lat_lim[2], model$input$lat_lim[3])
@@ -623,10 +621,6 @@ super_thin = function(K = "median_ci",
       dist_mat[i, j] = d
     }
   }
-
-  #diag(dist_mat) = 0
-  #dist_mat[upper.tri(dist_mat)] = t(dist_mat)[upper.tri(dist_mat)]
-
 
   # convert distances to correct units
   if (model$input$dist_unit == "mile") {
@@ -703,13 +697,26 @@ super_thin = function(K = "median_ci",
 #'
 #' @param model the output from \code{nph()}
 #'
-#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library,
 #' and is used within the function that produces triggering plots.
 #'
-#' @return a list of variance estimates for all utilized triggering component
-
-
+#' @return a list of variance estimates for each bin of all utilized triggering components
+#'
+#' @examples
+#' data("hm.csv")
+#' out = nph(dates = hm$t,
+#'    ref_date = "1999-10-16",
+#'    lat = hm$lat,
+#'    lon = hm$lon,
+#'    marks = hm$m,
+#'    time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+#'    space_breaks = c(0,0.5, 1, 10, 25, 100),
+#'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+#'    just_times = T)
+#' se = se_bars(out)
+#'
 #' @export
+#'
 se_bars = function(model){
 
   time_breaks = model$time_breaks
@@ -775,7 +782,8 @@ se_bars = function(model){
 #' @param h_ylim vector of minimum and maximum y-axis value shown in the spatial plot
 #' @param k_ylim vector of minimum and maximum y-axis value shown in the magnitude plot
 #' @param mag_label character string representing what the magnitude measures
-#' @param title character string for the title of the collection of triggering plots
+#' @param se_include TRUE to include standard error estimates for bins of triggering components, FALSE
+#' to exclude them from the visualizations
 #'
 #' @return \code{all_plots} is a cowplot object of histogram estimators for all utilized triggering components
 #' @return \code{time_plot} is a ggplot object of the histogram estimator for the temporal effect
@@ -783,7 +791,21 @@ se_bars = function(model){
 #' NULL if data provided is not a spatial process
 #' @return \code{mark_plot} is a ggplot object of the histogram estimator for the mark effect,
 #' NULL if data provided is not a marked process
-
+#'
+#' @examples
+#' data("hm.csv")
+#' out = nph(dates = hm$t,
+#'    ref_date = "1999-10-16",
+#'    lat = hm$lat,
+#'    lon = hm$lon,
+#'    marks = hm$m,
+#'    time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+#'    space_breaks = c(0,0.5, 1, 10, 25, 100),
+#'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+#'    just_times = T)
+#' tp = trig_plots(out,
+#'     g_xlim = )
+#'
 #' @export
 trig_plots = function(model,
                       g_xlim = c(min(model$time_breaks), max(model$time_breaks)),
@@ -793,7 +815,7 @@ trig_plots = function(model,
                       h_ylim = c(0,NA),
                       k_ylim = c(0,NA),
                       mag_label = "magnitude",
-                      plot_title = NULL){
+                      se_include = TRUE){
 
   time_breaks = model$time_breaks
   n1 = length(time_breaks)
@@ -833,10 +855,8 @@ trig_plots = function(model,
     ggplot2::coord_cartesian(xlim = g_xlim, ylim = g_ylim) +
     ggplot2::xlab(paste("t (time in ", model$input$time_unit, "s)", sep = "")) +
     ggplot2::ylab("g(t)")
-    # ggplot2::theme(axis.title.x = element_text(size = 20),
-    #                axis.title.y = element_text(size = 20),
-    #                axis.text = element_text(size = 20))
 
+  if(se_include == TRUE) {
   for (i in 1:(n1-1)){
     trig_g = trig_g +
       ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
@@ -848,6 +868,7 @@ trig_plots = function(model,
                                            time_df$g[i] + 2*time_df$se[i],
                                            time_df$g[i] + 2*time_df$se[i]) ),
                                    fill = "grey")
+  }
   }
 
   trig_g = trig_g + ggplot2::geom_step(ggplot2::aes(group=1)) +
@@ -869,11 +890,8 @@ trig_plots = function(model,
     ggplot2::coord_cartesian(xlim = k_xlim, ylim = k_ylim) +
     ggplot2::xlab(paste("m (", mag_label, ")", sep = "")) +
     ggplot2::ylab("k(m)")
-    # delete this
-    # ggplot2::theme(axis.title.x = element_text(size = 20),
-    #                axis.title.y = element_text(size = 20),
-    #                axis.text = element_text(size = 20))
 
+  if(se_include == TRUE){
   for (i in 1:(n2-1)){
     trig_k = trig_k + ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
                                    data = data.frame(
@@ -884,6 +902,7 @@ trig_plots = function(model,
                                            mag_df$k[i] + 2*mag_df$se[i],
                                            mag_df$k[i] + 2*mag_df$se[i])),
                                    fill = "grey")
+  }
   }
 
   trig_k = trig_k + ggplot2::geom_step(ggplot2::aes(group=1)) +
@@ -913,6 +932,7 @@ trig_plots = function(model,
     ggplot2::xlab(paste("s (distance in ", model$input$dist_unit, "s)", sep = "")) +
     ggplot2::ylab("h(s)")
 
+  if(se_include == TRUE){
   for (i in 1:(n1-1)){
     trig_h = trig_h + ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
                                    data = data.frame(
@@ -923,6 +943,7 @@ trig_plots = function(model,
                                            dist_df$h[i] + 2*dist_df$se[i],
                                            dist_df$h[i] + 2*dist_df$se[i]) ),
                                    fill = "grey")
+  }
   }
 
   trig_h = trig_h + ggplot2::geom_step(ggplot2::aes(group=1)) +
@@ -941,15 +962,6 @@ trig_plots = function(model,
     trig_h = NULL
   }
 
-  # if (sum(model$mark_bins) == 0 & sum(model$dist_bins) == 0){
-  #   out = gridExtra::grid.arrange(trig_g, ncol = 1)
-  # } else if (sum(model$mark_bins) != 0 & sum(model$dist_bins) == 0) {
-  #   out = gridExtra::grid.arrange(trig_g, trig_k, ncol = 2)
-  # } else if (sum(model$mark_bins) == 0 & sum(model$dist_bins) != 0) {
-  #   out = gridExtra::grid.arrange(trig_g, trig_h, ncol = 2)
-  # } else {
-  #   out = gridExtra::grid.arrange(trig_g, trig_h, trig_k, ncol = 3)
-  # }
   if (sum(model$mark_bins) == 0 & sum(model$dist_bins) == 0){
     all_plots = cowplot::plot_grid(trig_g, ncol = 1)
   } else if (sum(model$mark_bins) != 0 & sum(model$dist_bins) == 0) {
@@ -960,13 +972,6 @@ trig_plots = function(model,
     all_plots = cowplot::plot_grid(trig_g, trig_h, trig_k, ncol = 3)
   }
 
-  # title = cowplot::ggdraw() +
-  #   cowplot::draw_label(plot_title, x = 0, hjust = 0) +
-  #   ggplot2::theme_set(cowplot::theme_cowplot(font_size=20)) +
-  #   ggplot2::theme(plot.margin = ggplot2::margin(0, 0, 0, 7))
-
-  #all_plots = cowplot::plot_grid(title, out, ncol = 1, rel_heights = c(0.15, 1))
-  # all_plots = out
   out = list(all_plots = all_plots, time_plot = trig_g,
          space_plot = trig_h, mark_plot = trig_k)
   return(out)
@@ -984,13 +989,26 @@ trig_plots = function(model,
 #' @param method chacter string denoting if the residual analysis method utilized was
 #' "superthin", "thin", or "superpose"
 #' @param time_label character string that provides the frequency of tick marks on the x-axis
-#' @param plot_title character string for the plot title
 #'
 #' @return a tiered plot with superposed points on the top tier, points that were retained, not thinned,
 #' on the middle tier, and points that were thinned on the bottom tier.
+#'
+#' @examples
+#' data("hm.csv")
+#' out = nph(dates = hm$t,
+#'    ref_date = "1999-10-16",
+#'    lat = hm$lat,
+#'    lon = hm$lon,
+#'    marks = hm$m,
+#'    time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+#'    space_breaks = c(0,0.5, 1, 10, 25, 100),
+#'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+#'    just_times = T)
+#' st = super_thin(out)
+#' sp = st_plot(st, "superthin")
 #' @export
 st_plot = function(superthin, method = "superthin",
-                   time_label = "Year", plot_title = NULL){
+                   time_label = "Year"){
 
   superthin$y = rep(0, nrow(superthin))
   for (i in 1:nrow(superthin)) {
@@ -1009,7 +1027,6 @@ st_plot = function(superthin, method = "superthin",
                  show.legend = FALSE) +
     ggplot2::theme(axis.title.y= ggplot2::element_blank(),
           axis.ticks.y=ggplot2::element_blank()) +
-          #axis.text.y=element_blank()) +
     ggplot2::scale_color_manual(breaks = c("sim", "retain", "thin"),
                        values=c("grey3", "grey40", "grey70")) +
     ggplot2::xlab(time_label) +
@@ -1023,7 +1040,6 @@ st_plot = function(superthin, method = "superthin",
                             show.legend = FALSE) +
       ggplot2::theme(axis.title.y= ggplot2::element_blank(),
                      axis.ticks.y=ggplot2::element_blank()) +
-      #axis.text.y=element_blank()) +
       ggplot2::scale_color_manual(breaks = c("retain", "thin"),
                                   values=c("grey40", "grey70")) +
       ggplot2::xlab(time_label) +
@@ -1042,10 +1058,7 @@ st_plot = function(superthin, method = "superthin",
                                   values=c("grey3", "grey40")) +
       ggplot2::xlab(time_label) +
       ggplot2::scale_y_continuous(breaks = c(0,1,2) + 0.5,
-                                  labels = c("Observed", "Simulated")) +
-      ggplot2::ggtitle(plot_title) +
-      ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
-                                                        margin = ggplot2::margin(t = 8, b = -20)))
+                                  labels = c("Observed", "Simulated"))
   }
   return(p)
 }
@@ -1063,20 +1076,32 @@ st_plot = function(superthin, method = "superthin",
 #' desired time difference in between x axis labels
 #' @param date_labels character string of % followed by first letter of time unit, i.e.
 #' %Y for year, for desired label on x axis tick marks
-#' @param plot_title character string for the title of the plot
 #'
 #' @return a histogram of the super-thinned process.
+#'
+#' @examples
+#' data("hm.csv")
+#' out = nph(dates = hm$t,
+#'    ref_date = "1999-10-16",
+#'    lat = hm$lat,
+#'    lon = hm$lon,
+#'    marks = hm$m,
+#'    time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+#'    space_breaks = c(0,0.5, 1, 10, 25, 100),
+#'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+#'    just_times = T)
+#' st = super_thin(out)
+#' ci_h = ci_hist(st)
 #' @export
+#'
 ci_hist = function(superthin, nbins = 30,
-                   date_break = "1 year", date_label = "%Y",
-                   plot_title = NULL){
+                   date_break = "1 year", date_label = "%Y"){
   st = superthin[which(superthin$type != "thin"),]
   out = ggplot2::ggplot(data = st) +
     ggplot2::geom_histogram(ggplot2::aes(x = Date), bins = nbins) +
     # ggplot2::scale_x_date(date_breaks = date_break,
     #                       date_labels = date_label) +
-    ggplot2::ylab("frequency") +
-    ggplot2::ggtitle(plot_title)
+    ggplot2::ylab("frequency")
     # ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
     #                                                   margin = ggplot2::margin(t = 8, b = -20)))
 
@@ -1096,15 +1121,28 @@ ci_hist = function(superthin, nbins = 30,
 #' @param superthin the output from \code{super_thin()}
 #' @param min_date the minimum date to be shown on the plot
 #' @param max_date the maximum date to be shown on the plot
-#' @param plot_title character string for the title of the plot
 #'
 #' @return a plot that shows the estimated conditional intensity as a black line with the number of monthly events as
 #' gray vertical lines
+#'
+#' @examples
+#' data("hm.csv")
+#' out = nph(dates = hm$t,
+#'    ref_date = "1999-10-16",
+#'    lat = hm$lat,
+#'    lon = hm$lon,
+#'    marks = hm$m,
+#'    time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+#'    space_breaks = c(0,0.5, 1, 10, 25, 100),
+#'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+#'    just_times = T)
+#' st = super_thin(out)
+#' ci_p = ci_plot(out, st)
+#'
 #' @export
 ci_plot = function(model, min_date = model$input$ref_date,
                    max_date = model$data$dates[nrow(model$data)],
-                   superthin,
-                   plot_title = NULL){
+                   superthin){
 
   df = model$data
   df$Year = lubridate::year(df$dates)
@@ -1137,7 +1175,6 @@ ci_plot = function(model, min_date = model$input$ref_date,
     dplyr::mutate(type = "data") %>%
     dplyr::bind_rows(ci_one) %>%
     ggplot2::ggplot() +
-      #ggplot2::geom_line(ggplot2::aes(x = Date, y = n, linetype = type)) +
     ggplot2::geom_segment(ggplot2::aes(x = Date, y = n,
                               xend = Date, yend = 0),
                           alpha = 0.5) +
@@ -1149,7 +1186,6 @@ ci_plot = function(model, min_date = model$input$ref_date,
         ggplot2::scale_linetype_manual(name = "Number of \nMonthly Events",
                         labels = c("Observed", "Estimated"),
                         values = c("solid", "dashed")) +
-    #ggplot2::ylab("Number of Monthly Events") +
     ggplot2::ggtitle(plot_title)
     ggplot2::scale_x_date(breaks = seq(
       from = lubridate::year(model$ref_date),
@@ -1157,3 +1193,40 @@ ci_plot = function(model, min_date = model$input$ref_date,
     labels = lubridate::year(model$ref_date):lubridate::year(max)
 }
 
+
+# Background Rate Plot ----------------------------------------------------
+
+
+#' Plot of nonstationary background rate over space
+#'
+#' This function exports a heat map of the background rate of a nonstationary background rate over space, and is paired
+#' with the \code{nph()} function when a nonstationary background rate is specified.
+#'
+#' @param model the output from \code{nph()}
+#' @param vals_include if TRUE, the background rate values will be printed on the map
+#'
+#' @return a ggplot of the background rates as a heat map
+#'
+#' @examples
+#' data("hm.csv")
+#' out = nph(dates = hm$t,
+#'    ref_date = "1999-10-16",
+#'    lat = hm$lat,
+#'    lon = hm$lon,
+#'    marks = hm$m,
+#'    time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+#'    space_breaks = c(0,0.5, 1, 10, 25, 100),
+#'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+#'    just_times = TRUE,
+#'    nonstat_br = TRUE)
+#' br_p = br_plot(out, vals_include = TRUE)
+#'
+#' @export
+br_plot = function(model, vals_include = FALSE) {
+  br_grid = model$br_grid
+  ggplot2::ggplot(data = br_grid, aes(x = lon, y = lat, fill = br)) +
+    ggplot2::scale_fill_gradient(low = "white", high = "black") +
+    ggplot2::geom_tile() +
+    ggplot2::scale_x_continuous(minor_breaks = NULL) +
+    ggplot2::scale_y_continuous(minor_breaks = NULL)
+}

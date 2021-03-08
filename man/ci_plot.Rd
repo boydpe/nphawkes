@@ -8,8 +8,7 @@ ci_plot(
   model,
   min_date = model$input$ref_date,
   max_date = model$data$dates[nrow(model$data)],
-  superthin,
-  plot_title = NULL
+  superthin
 )
 }
 \arguments{
@@ -20,8 +19,6 @@ ci_plot(
 \item{max_date}{the maximum date to be shown on the plot}
 
 \item{superthin}{the output from \code{super_thin()}}
-
-\item{plot_title}{character string for the title of the plot}
 }
 \value{
 a plot that shows the estimated conditional intensity as a black line with the number of monthly events as
@@ -31,4 +28,19 @@ gray vertical lines
 In this function, the estimated conditional intensity is plotted against
 the number of events. The estimated conditional intensity is found by taking the
 median value in each month and multiplying it by the number of days in that month.
+}
+\examples{
+data("hm.csv")
+out = nph(dates = hm$t,
+   ref_date = "1999-10-16",
+   lat = hm$lat,
+   lon = hm$lon,
+   marks = hm$m,
+   time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+   space_breaks = c(0,0.5, 1, 10, 25, 100),
+   mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+   just_times = T)
+st = super_thin(out)
+ci_p = ci_plot(out, st)
+
 }

@@ -9,12 +9,26 @@ se_bars(model)
 \arguments{
 \item{model}{the output from \code{nph()}
 
-This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library,
 and is used within the function that produces triggering plots.}
 }
 \value{
-a list of variance estimates for all utilized triggering component
+a list of variance estimates for each bin of all utilized triggering components
 }
 \description{
 This function estimates the variance of each bin for all utilized triggering components.
+}
+\examples{
+data("hm.csv")
+out = nph(dates = hm$t,
+   ref_date = "1999-10-16",
+   lat = hm$lat,
+   lon = hm$lon,
+   marks = hm$m,
+   time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+   space_breaks = c(0,0.5, 1, 10, 25, 100),
+   mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+   just_times = T)
+se = se_bars(out)
+
 }

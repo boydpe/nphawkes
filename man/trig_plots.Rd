@@ -13,7 +13,7 @@ trig_plots(
   h_ylim = c(0, NA),
   k_ylim = c(0, NA),
   mag_label = "magnitude",
-  plot_title = NULL
+  se_include = TRUE
 )
 }
 \arguments{
@@ -33,7 +33,8 @@ trig_plots(
 
 \item{mag_label}{character string representing what the magnitude measures}
 
-\item{title}{character string for the title of the collection of triggering plots}
+\item{se_include}{TRUE to include standard error estimates for bins of triggering components, FALSE
+to exclude them from the visualizations}
 }
 \value{
 \code{all_plots} is a cowplot object of histogram estimators for all utilized triggering components
@@ -49,4 +50,19 @@ NULL if data provided is not a marked process
 \description{
 This function exports histogram estimators for all utilized triggering components. Plots show
 estimated value of triggering functions for each bin along with \pm 2 standard errors bars
+}
+\examples{
+data("hm.csv")
+out = nph(dates = hm$t,
+   ref_date = "1999-10-16",
+   lat = hm$lat,
+   lon = hm$lon,
+   marks = hm$m,
+   time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+   space_breaks = c(0,0.5, 1, 10, 25, 100),
+   mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+   just_times = T)
+tp = trig_plots(out,
+    g_xlim = )
+
 }

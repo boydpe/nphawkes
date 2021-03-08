@@ -4,12 +4,7 @@
 \alias{st_plot}
 \title{Super-thinning Plot}
 \usage{
-st_plot(
-  superthin,
-  method = "superthin",
-  time_label = "Year",
-  plot_title = NULL
-)
+st_plot(superthin, method = "superthin", time_label = "Year")
 }
 \arguments{
 \item{superthin}{the output from \code{super_thin()}}
@@ -18,8 +13,6 @@ st_plot(
 "superthin", "thin", or "superpose"}
 
 \item{time_label}{character string that provides the frequency of tick marks on the x-axis}
-
-\item{plot_title}{character string for the plot title}
 }
 \value{
 a tiered plot with superposed points on the top tier, points that were retained, not thinned,
@@ -27,4 +20,18 @@ on the middle tier, and points that were thinned on the bottom tier.
 }
 \description{
 This function exports a plot displaying the performance of the super-thinning procedure.
+}
+\examples{
+data("hm.csv")
+out = nph(dates = hm$t,
+   ref_date = "1999-10-16",
+   lat = hm$lat,
+   lon = hm$lon,
+   marks = hm$m,
+   time_breaks = c(0,0.1, 0.5, 1,7,93,600),
+   space_breaks = c(0,0.5, 1, 10, 25, 100),
+   mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
+   just_times = T)
+st = super_thin(out)
+sp = st_plot(st, "superthin")
 }
