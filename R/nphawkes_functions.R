@@ -217,7 +217,7 @@ nph <- function(dates, ref_date = min(dates),
     time_breaks[1] = 0
   } else {time_breaks = time_breaks}
 
-  if(is.(mark_quantile) == FALSE){
+  if(is.na(mark_quantile) == FALSE){
     mark_breaks = unique(as.vector(quantile(marks,
                                        probs = seq(0, 1, length.out = mark_quantile + 1))))
     mark_breaks[length(mark_breaks)] = mark_breaks[length(mark_breaks)] + 1
