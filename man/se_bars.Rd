@@ -7,16 +7,17 @@
 se_bars(model)
 }
 \arguments{
-\item{model}{the output from \code{nph()}
-
-This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library,
-and is used within the function that produces triggering plots.}
+\item{model}{the output from \code{nph()}}
 }
 \value{
 a list of variance estimates for each bin of all utilized triggering components
 }
 \description{
 This function estimates the variance of each bin for all utilized triggering components.
+}
+\details{
+This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library,
+and is used within the function that produces triggering plots.
 }
 \examples{
 data("hm.csv")

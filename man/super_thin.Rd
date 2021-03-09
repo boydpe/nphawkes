@@ -66,7 +66,7 @@ out = nph(dates = hm$t,
    space_breaks = c(0,0.5, 1, 10, 25, 100),
    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
    just_times = T)
-st = super_thin(K "median_ci",
+st = super_thin(K = "median_ci",
     model = out,
     method = "superthin",
     )

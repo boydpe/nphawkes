@@ -1,5 +1,5 @@
 # Peter Boyd
-# nphawkes funcions
+# nphawkes functions
 
 
 # Rcpp::compileAttributes() #when changing c++ code
@@ -68,7 +68,7 @@
 #'
 #' @examples
 #' data("hm.csv")
-#' out = nph(dates = hm$t,
+#' out = misd(dates = hm$t,
 #'    ref_date = "1999-10-16",
 #'    lat = hm$lat,
 #'    lon = hm$lon,
@@ -78,7 +78,7 @@
 #'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
 #'    just_times = T)
 #'
-#'  out1 = nph(dates = hm$t,
+#'  out1 = misd(dates = hm$t,
 #'    ref_date = "1999-10-16",
 #'    lat = hm$lat,
 #'    lon = hm$lon,
@@ -91,7 +91,7 @@
 
 
 #' @export
-nph <- function(dates, ref_date = min(dates),
+misd <- function(dates, ref_date = min(dates),
                 lat = rep(0, length(dates)),
                 lon = rep(0, length(dates)),
                 marks = rep(0, length(dates)),
@@ -294,6 +294,9 @@ nph <- function(dates, ref_date = min(dates),
   }
   df$parent = max_event
 
+  df$dates = lubridate::ymd(ref_date) +
+    lubridate::days(floor(df$times))
+
   perc_br = sum(max_diag) / length(max_diag)
   perc_diag = sum(diag(p0)) / nrow(p0)
 
@@ -314,19 +317,19 @@ nph <- function(dates, ref_date = min(dates),
 #'
 #' This function estimates the conditional intensity function of the observed process.
 #'
-#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
-#' Using the output from the \code{nph()} function. The exported data frame will contain, for each event,
+#' This function is to be used in conjunction with the \code{misd()} function from the \code{nphawkes} library.
+#' Using the output from the \code{misd()} function. The exported data frame will contain, for each event,
 #' the time elapsed (in days) since the beginning of the observation window, the date of the event,
 #' the conditional intensity at the event's location in time (or space-time), as well as the
 #' coordinates and marks (if provided).
 #'
-#' @param model the output from \code{nph()}
+#' @param model the output from \code{misd()}
 #'
 #' @return a data frame containing the time, location, marks, and estimated conditional intensity
 #'
 #' @examples
 #' data("hm.csv")
-#' out = nph(dates = hm$t,
+#' out = misd(dates = hm$t,
 #'    ref_date = "1999-10-16",
 #'    lat = hm$lat,
 #'    lon = hm$lon,
@@ -420,7 +423,7 @@ cond_int = function(model) {
 #' simply considering events of type "thin" or "retain", while superpositioning only can be executed
 #' by simply treating "thinned" points as "retained".
 #'
-#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+#' This function is to be used in conjunction with the \code{misd()} function from the \code{nphawkes} library.
 #'
 #' To simulate spatial data, the user may define the \code{map} and \code{region} to easily simulate points within
 #' set political borders. This feature is not quite implementable, but may be soon.
@@ -431,7 +434,7 @@ cond_int = function(model) {
 #' @param K a constant or character string that governs the amount of thinning and
 #' superposing that is implemented. Can be a constant value, the median, mean, minimum, or maximum
 #'  conditional intensity: "median_ci", "mean_ci", "min_ci", or "max_ci", respectively.
-#' @param model the output from \code{nph()}
+#' @param model the output from \code{misd()}
 #' @param method character string that defines residual analysis method as "superthin", "thin", or "superpose"
 #' @param map name of map provided by the maps package, defaults to maps::world
 #' @param region name of subregion to include, defaults to entirety of map
@@ -446,7 +449,7 @@ cond_int = function(model) {
 #'
 #' @examples
 #' data("hm.csv")
-#' out = nph(dates = hm$t,
+#' out = misd(dates = hm$t,
 #'    ref_date = "1999-10-16",
 #'    lat = hm$lat,
 #'    lon = hm$lon,
@@ -455,7 +458,7 @@ cond_int = function(model) {
 #'    space_breaks = c(0,0.5, 1, 10, 25, 100),
 #'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
 #'    just_times = T)
-#' st = super_thin(K "median_ci",
+#' st = super_thin(K = "min_ci",
 #'     model = out,
 #'     method = "superthin",
 #'     )
@@ -467,9 +470,7 @@ super_thin = function(K = "median_ci",
                       map = world, region = ".",
                       sim_grid = TRUE,
                       lat_lim = model$input$lat_lim,
-                      lon_lim = model$input$lon_lim,
-                      lat_bounds = c(min(model$data$lat), max(model$data$lat)),
-                      lon_bounds = c(min(model$data$lon), max(model$data$lon))) {
+                      lon_lim = model$input$lon_lim) {
 
   # FIRST: CI FOR DATA
   times = model$data$times
@@ -603,39 +604,37 @@ super_thin = function(K = "median_ci",
     sim_pp$lat = sim_pp$lat
   }
 
-  dist_mat = matrix(data = NA, nrow = n2, ncol = n2)
-  R = 6371e3
+  data_pp$marks = ifelse(data_pp$marks == mark_breaks[1],
+                         data_pp$marks + 0.0001, data_pp$marks)
 
   for (i in 1:n2) {
-    for (j in 1:n2) {
+    sim_trig = 0
+    dist_vec = rep(NA, n2)
+    R = 6371e3
+
+    for (j in 1:(sim_pp$row1[i])) {
       phi1 = sim_pp$lat[i] * pi / 180
-      phi2 = sim_pp$lat[j] * pi / 180
-      latdiff = (sim_pp$lat[j] - sim_pp$lat[i]) * pi / 180
-      londiff = (sim_pp$lon[j] - sim_pp$lon[i]) * pi / 180
+      phi2 = data_pp$lat[j] * pi / 180
+      latdiff = (data_pp$lat[j] - sim_pp$lat[i]) * pi / 180
+      londiff = (data_pp$lon[j] - sim_pp$lon[i]) * pi / 180
 
       a = sin(latdiff / 2) * sin(latdiff / 2) +
         cos(phi1) * cos(phi2) * sin(londiff / 2) * sin(londiff / 2)
       b = 2 * atan2(sqrt(a), sqrt(1 - a))
       d = R * b
 
-      dist_mat[i, j] = d
+      dist_vec[j] = d
     }
-  }
 
-  # convert distances to correct units
-  if (model$input$dist_unit == "mile") {
-    dist_mat = dist_mat*0.000621371
-  } else if (model$input$dist_unit == "kilometer") {
-    dist_mat = dist_mat*0.001
-  } else {
-    dist_mat = dist_mat
-  }
+    # convert distances to correct units
+    if (model$input$dist_unit == "mile") {
+      dist_vec = dist_vec*0.000621371
+    } else if (model$input$dist_unit == "kilometer") {
+      dist_vec = dist_vec*0.001
+    } else {
+      dist_vec = dist_vec
+    }
 
-  data_pp$marks = ifelse(data_pp$marks == mark_breaks[1],
-                         data_pp$marks + 0.0001, data_pp$marks)
-
-  for (i in 1:n2) {
-    sim_trig = 0
     # get triggering component for each
     for (j in 1:(sim_pp$row1[i])){
       td = sim_pp$Time[i] - data_pp$Time[j]
@@ -646,7 +645,7 @@ super_thin = function(K = "median_ci",
       kb = bin_f(data_pp$marks[j], mark_breaks)
       kk = model$k[kb]
 
-      hd = dist_mat[i,j]
+      hd = dist_vec[j]
       hd = ifelse(hd == 0, 0.00001, hd)
       hb = bin_f(hd, space_breaks)
       hh = model$h[hb]
@@ -695,16 +694,16 @@ super_thin = function(K = "median_ci",
 #'
 #' This function estimates the variance of each bin for all utilized triggering components.
 #'
-#' @param model the output from \code{nph()}
-#'
-#' This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library,
+#' This function is to be used in conjunction with the \code{misd()} function from the \code{nphawkes} library,
 #' and is used within the function that produces triggering plots.
+#'
+#' @param model the output from \code{misd()}
 #'
 #' @return a list of variance estimates for each bin of all utilized triggering components
 #'
 #' @examples
 #' data("hm.csv")
-#' out = nph(dates = hm$t,
+#' out = misd(dates = hm$t,
 #'    ref_date = "1999-10-16",
 #'    lat = hm$lat,
 #'    lon = hm$lon,
@@ -772,15 +771,18 @@ se_bars = function(model){
 #' Triggering Plots
 #'
 #' This function exports histogram estimators for all utilized triggering components. Plots show
-#' estimated value of triggering functions for each bin along with \pm 2 standard errors bars
+#' estimated value of triggering functions for each bin along with \eqn{+/- 2} standard errors bars
 #'
-#' @param model the output from \code{nph()}
-#' @param g_xlim vector of minimum and maximum x-axis value shown in the temporal plot
-#' @param h_xlim vector of minimum and maximum x-axis value shown in the spatial plot
-#' @param k_xlim vector of minimum and maximum x-axis value shown in the magnitude plot
-#' @param g_ylim vector of minimum and maximum y-axis value shown in the temporal plot
-#' @param h_ylim vector of minimum and maximum y-axis value shown in the spatial plot
-#' @param k_ylim vector of minimum and maximum y-axis value shown in the magnitude plot
+#' Depending on bin size, x-axis labels may overlap, impairing readability. Axis tick marks may be changed for plots
+#' using \code{scale_x_continuous()} within the \code{ggplot2} library.
+#'
+#' @param model the output from \code{misd()}
+#' @param time_xlim vector of minimum and maximum x-axis value shown in the temporal plot
+#' @param space_xlim vector of minimum and maximum x-axis value shown in the spatial plot
+#' @param mark_xlim vector of minimum and maximum x-axis value shown in the magnitude plot
+#' @param time_ylim vector of minimum and maximum y-axis value shown in the temporal plot
+#' @param space_ylim vector of minimum and maximum y-axis value shown in the spatial plot
+#' @param mark_ylim vector of minimum and maximum y-axis value shown in the magnitude plot
 #' @param mag_label character string representing what the magnitude measures
 #' @param se_include TRUE to include standard error estimates for bins of triggering components, FALSE
 #' to exclude them from the visualizations
@@ -794,7 +796,7 @@ se_bars = function(model){
 #'
 #' @examples
 #' data("hm.csv")
-#' out = nph(dates = hm$t,
+#' out = misd(dates = hm$t,
 #'    ref_date = "1999-10-16",
 #'    lat = hm$lat,
 #'    lon = hm$lon,
@@ -804,16 +806,18 @@ se_bars = function(model){
 #'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
 #'    just_times = T)
 #' tp = trig_plots(out,
-#'     g_xlim = )
+#'     time_xlim = c(0, 2),
+#'     space_xlim = c(0, 10),
+#'     mark_xlim = c(3.9, 5.1))
 #'
 #' @export
 trig_plots = function(model,
-                      g_xlim = c(min(model$time_breaks), max(model$time_breaks)),
-                      h_xlim = c(min(model$space_breaks), max(model$space_breaks)),
-                      k_xlim = c(min(model$mark_breaks), max(model$mark_breaks)),
-                      g_ylim = c(0,NA),
-                      h_ylim = c(0,NA),
-                      k_ylim = c(0,NA),
+                      time_xlim = c(min(model$time_breaks), max(model$time_breaks)),
+                      space_xlim = c(min(model$space_breaks), max(model$space_breaks)),
+                      mark_xlim = c(min(model$mark_breaks), max(model$mark_breaks)),
+                      time_ylim = c(0,NA),
+                      space_ylim = c(0,NA),
+                      mark_ylim = c(0,NA),
                       mag_label = "magnitude",
                       se_include = TRUE){
 
@@ -842,17 +846,17 @@ trig_plots = function(model,
                         dist = space_breaks,
                        se = c(se_h, se_h[length(se_h)]))
 
-  g_ylim[2] = ifelse(is.na(g_ylim[2]) == TRUE,
-                     max(time_df$g + time_df$se), g_ylim[2])
-  h_ylim[2] = ifelse(is.na(h_ylim[2]) == TRUE,
-                     max(dist_df$h + dist_df$se), h_ylim[2])
-  k_ylim[2] = ifelse(is.na(k_ylim[2]) == TRUE,
-                     max(mag_df$k + mag_df$se), k_ylim[2])
+  time_ylim[2] = ifelse(is.na(time_ylim[2]) == TRUE,
+                     max(time_df$g + time_df$se), time_ylim[2])
+  space_ylim[2] = ifelse(is.na(space_ylim[2]) == TRUE,
+                     max(dist_df$h + dist_df$se), space_ylim[2])
+  mark_ylim[2] = ifelse(is.na(mark_ylim[2]) == TRUE,
+                     max(mag_df$k + mag_df$se), mark_ylim[2])
 
 
   # Time Plot
   trig_g = ggplot2::ggplot(time_df, ggplot2::aes(time, g)) +
-    ggplot2::coord_cartesian(xlim = g_xlim, ylim = g_ylim) +
+    ggplot2::coord_cartesian(xlim = time_xlim, ylim = time_ylim) +
     ggplot2::xlab(paste("t (time in ", model$input$time_unit, "s)", sep = "")) +
     ggplot2::ylab("g(t)")
 
@@ -887,7 +891,7 @@ trig_plots = function(model,
   # Magnitude Plot
   if (sum(model$mark_bins) != 0){
   trig_k = ggplot2::ggplot(mag_df, ggplot2::aes(magnitude, k)) +
-    ggplot2::coord_cartesian(xlim = k_xlim, ylim = k_ylim) +
+    ggplot2::coord_cartesian(xlim = mark_xlim, ylim = mark_ylim) +
     ggplot2::xlab(paste("m (", mag_label, ")", sep = "")) +
     ggplot2::ylab("k(m)")
 
@@ -928,7 +932,7 @@ trig_plots = function(model,
   if(sum(model$dist_bins) != 0) {
 
   trig_h = ggplot2::ggplot(dist_df, ggplot2::aes(dist, h)) +
-    ggplot2::coord_cartesian(xlim = h_xlim, ylim = h_ylim) +
+    ggplot2::coord_cartesian(xlim = space_xlim, ylim = space_ylim) +
     ggplot2::xlab(paste("s (distance in ", model$input$dist_unit, "s)", sep = "")) +
     ggplot2::ylab("h(s)")
 
@@ -995,7 +999,7 @@ trig_plots = function(model,
 #'
 #' @examples
 #' data("hm.csv")
-#' out = nph(dates = hm$t,
+#' out = misd(dates = hm$t,
 #'    ref_date = "1999-10-16",
 #'    lat = hm$lat,
 #'    lon = hm$lon,
@@ -1022,8 +1026,8 @@ st_plot = function(superthin, method = "superthin",
   }
 
   if (method == "superthin"){
-    p = ggplot2::ggplot(data = superthin, ggplot2::aes(x = Date, col = type)) +
-    ggplot2::geom_segment(ggplot2::aes(x = Date, y = y, yend = y + 1, xend = Date),
+    p = ggplot2::ggplot(data = superthin, ggplot2::aes(x = dates, col = type)) +
+    ggplot2::geom_segment(ggplot2::aes(x = dates, y = y, yend = y + 1, xend = dates),
                  show.legend = FALSE) +
     ggplot2::theme(axis.title.y= ggplot2::element_blank(),
           axis.ticks.y=ggplot2::element_blank()) +
@@ -1035,8 +1039,8 @@ st_plot = function(superthin, method = "superthin",
 
   } else if (method == "thin"){
     p = superthin %>% dplyr::filter(type != "sim") %>%
-    ggplot2::ggplot(ggplot2::aes(x = Date, col = type)) +
-      ggplot2::geom_segment(ggplot2::aes(x = Date, y = y, yend = y + 1, xend = Date),
+    ggplot2::ggplot(ggplot2::aes(x = dates, col = type)) +
+      ggplot2::geom_segment(ggplot2::aes(x = dates, y = y, yend = y + 1, xend = dates),
                             show.legend = FALSE) +
       ggplot2::theme(axis.title.y= ggplot2::element_blank(),
                      axis.ticks.y=ggplot2::element_blank()) +
@@ -1049,8 +1053,8 @@ st_plot = function(superthin, method = "superthin",
   } else {
     p = superthin %>% dplyr::mutate(type = replace(type, type == "thin", "retain")) %>%
       dplyr::mutate(replace(type, type == "retain", "observed")) %>%
-      ggplot2::ggplot(data = superthin, ggplot2::aes(x = Date, col = type)) +
-      ggplot2::geom_segment(ggplot2::aes(x = Date, y = y, yend = y + 1, xend = Date),
+      ggplot2::ggplot(data = superthin, ggplot2::aes(x = dates, col = type)) +
+      ggplot2::geom_segment(ggplot2::aes(x = dates, y = y, yend = y + 1, xend = dates),
                             show.legend = FALSE) +
       ggplot2::theme(axis.title.y= ggplot2::element_blank(),
                      axis.ticks.y=ggplot2::element_blank()) +
@@ -1081,7 +1085,7 @@ st_plot = function(superthin, method = "superthin",
 #'
 #' @examples
 #' data("hm.csv")
-#' out = nph(dates = hm$t,
+#' out = misd(dates = hm$t,
 #'    ref_date = "1999-10-16",
 #'    lat = hm$lat,
 #'    lon = hm$lon,
@@ -1098,13 +1102,8 @@ ci_hist = function(superthin, nbins = 30,
                    date_break = "1 year", date_label = "%Y"){
   st = superthin[which(superthin$type != "thin"),]
   out = ggplot2::ggplot(data = st) +
-    ggplot2::geom_histogram(ggplot2::aes(x = Date), bins = nbins) +
-    # ggplot2::scale_x_date(date_breaks = date_break,
-    #                       date_labels = date_label) +
+    ggplot2::geom_histogram(ggplot2::aes(x = dates), bins = nbins) +
     ggplot2::ylab("frequency")
-    # ggplot2::theme(plot.title = ggplot2::element_text(size = 12,
-    #                                                   margin = ggplot2::margin(t = 8, b = -20)))
-
   return(out)
 }
 
@@ -1117,7 +1116,7 @@ ci_hist = function(superthin, nbins = 30,
 #' the number of events. The estimated conditional intensity is found by taking the
 #' median value in each month and multiplying it by the number of days in that month.
 #'
-#' @param model the output from \code{nph()}
+#' @param model the output from \code{misd()}
 #' @param superthin the output from \code{super_thin()}
 #' @param min_date the minimum date to be shown on the plot
 #' @param max_date the maximum date to be shown on the plot
@@ -1127,7 +1126,7 @@ ci_hist = function(superthin, nbins = 30,
 #'
 #' @examples
 #' data("hm.csv")
-#' out = nph(dates = hm$t,
+#' out = misd(dates = hm$t,
 #'    ref_date = "1999-10-16",
 #'    lat = hm$lat,
 #'    lon = hm$lon,
@@ -1200,16 +1199,16 @@ ci_plot = function(model, min_date = model$input$ref_date,
 #' Plot of nonstationary background rate over space
 #'
 #' This function exports a heat map of the background rate of a nonstationary background rate over space, and is paired
-#' with the \code{nph()} function when a nonstationary background rate is specified.
+#' with the \code{misd()} function when a nonstationary background rate is specified.
 #'
-#' @param model the output from \code{nph()}
+#' @param model the output from \code{misd()}
 #' @param vals_include if TRUE, the background rate values will be printed on the map
 #'
 #' @return a ggplot of the background rates as a heat map
 #'
 #' @examples
 #' data("hm.csv")
-#' out = nph(dates = hm$t,
+#' out = misd(dates = hm$t,
 #'    ref_date = "1999-10-16",
 #'    lat = hm$lat,
 #'    lon = hm$lon,

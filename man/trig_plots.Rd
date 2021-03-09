@@ -49,7 +49,11 @@ NULL if data provided is not a marked process
 }
 \description{
 This function exports histogram estimators for all utilized triggering components. Plots show
-estimated value of triggering functions for each bin along with \pm 2 standard errors bars
+estimated value of triggering functions for each bin along with \eqn{+/- 2} standard errors bars
+}
+\details{
+Depending on bin size, x-axis labels may overlap, impairing readability. Axis tick marks may be changed for plots
+using \code{scale_x_continuous()} within the \code{ggplot2} library.
 }
 \examples{
 data("hm.csv")
@@ -63,6 +67,8 @@ out = nph(dates = hm$t,
    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
    just_times = T)
 tp = trig_plots(out,
-    g_xlim = )
+    g_xlim = c(0, 2),
+    h_xlim = c(0, 10),
+    k_xlim = c(3.9, 5.1))
 
 }
