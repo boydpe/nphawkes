@@ -4,9 +4,9 @@ Title: Nonparametric Hawkes Processes
 Version: 0.1.0
 Authors@R: person("Peter", "Boyd", email = "boydpe@oregonstate.edu",
   role = c("aut", "cre"))
-Description: This package analyzes Hawkes processes using nonparametric 
-    methods. It will utilize the Model Indpendent Stochastic Deculstering
-    algorithm and super-thinning for model fit assessment. 
+Description: Analyze Hawkes processes nonparametrically through 
+model indpendent stochastic declustering algorithm, 
+super-thinning, and plotting techniques.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
