@@ -14,7 +14,7 @@ ci_hist(superthin, nbins = 30, date_break = "1 year", date_label = "\%Y")
 \item{date_break}{character string of number followed by a time unit for the
 desired time difference in between x axis labels}
 
-\item{date_labels}{character string of % followed by first letter of time unit, i.e.
+\item{date_label}{character string of % followed by first letter of time unit, i.e.
 %Y for year, for desired label on x axis tick marks}
 }
 \value{
