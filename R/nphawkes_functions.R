@@ -1073,10 +1073,6 @@ st_plot = function(superthin, method = "superthin",
 #'
 #' @param superthin the output from \code{super_thin()}
 #' @param nbins scalar of the number of bins for the histogram
-#' @param date_break character string of number followed by a time unit for the
-#' desired time difference in between x axis labels
-#' @param date_label character string of \% followed by first letter of time unit, i.e.
-#' \%Y for year, for desired label on x axis tick marks
 #'
 #' @return a histogram of the super-thinned process.
 #'
@@ -1095,8 +1091,7 @@ st_plot = function(superthin, method = "superthin",
 #' ci_h = ci_hist(st)
 
 #' @export
-ci_hist = function(superthin, nbins = 30,
-                   date_break = "1 year", date_label = "%Y"){
+ci_hist = function(superthin, nbins = 30){
   st = superthin[which(superthin$type != "thin"),]
   out = ggplot2::ggplot(data = st) +
     ggplot2::geom_histogram(ggplot2::aes(x = dates), bins = nbins) +

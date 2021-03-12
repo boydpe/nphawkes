@@ -4,18 +4,12 @@
 \alias{ci_hist}
 \title{Histogram of super-thinned process}
 \usage{
-ci_hist(superthin, nbins = 30, date_break = "1 year", date_label = "\%Y")
+ci_hist(superthin, nbins = 30)
 }
 \arguments{
 \item{superthin}{the output from \code{super_thin()}}
 
 \item{nbins}{scalar of the number of bins for the histogram}
-
-\item{date_break}{character string of number followed by a time unit for the
-desired time difference in between x axis labels}
-
-\item{date_label}{character string of % followed by first letter of time unit, i.e.
-%Y for year, for desired label on x axis tick marks}
 }
 \value{
 a histogram of the super-thinned process.
