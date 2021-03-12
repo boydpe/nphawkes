@@ -1075,8 +1075,8 @@ st_plot = function(superthin, method = "superthin",
 #' @param nbins scalar of the number of bins for the histogram
 #' @param date_break character string of number followed by a time unit for the
 #' desired time difference in between x axis labels
-#' @param date_label character string of % followed by first letter of time unit, i.e.
-#' %Y for year, for desired label on x axis tick marks
+#' @param date_label character string of \% followed by first letter of time unit, i.e.
+#' \%Y for year, for desired label on x axis tick marks
 #'
 #' @return a histogram of the super-thinned process.
 #'
