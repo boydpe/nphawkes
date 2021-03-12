@@ -2,12 +2,12 @@ Package: nphawkes
 Type: Package
 Title: Nonparametric Hawkes Processes
 Version: 0.1.0
-Authors@R: person("Peter", "Boyd", email = "boydpe@oregonstate.edu",
+Authors@R: person("Peter", "Boyd", email = "peterboydstats@gmail.com",
   role = c("aut", "cre"))
 Description: Analyze Hawkes processes nonparametrically through 
     model indpendent stochastic declustering algorithm, 
     super-thinning, and plotting techniques.
-License: What license is it under?
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests: 
