@@ -9,9 +9,6 @@
 
 # Nonparametric Hawkes ----------------------------------------------------
 
-# maybe rename misd?
-# only uses lubridate
-
 #' Model Independent Stochastic Declustering
 #'
 #' This function uses nonparametric procedures to analyze a Hawkes

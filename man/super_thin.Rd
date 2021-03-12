@@ -12,9 +12,7 @@ super_thin(
   region = ".",
   sim_grid = TRUE,
   lat_lim = model$input$lat_lim,
-  lon_lim = model$input$lon_lim,
-  lat_bounds = c(min(model$data$lat), max(model$data$lat)),
-  lon_bounds = c(min(model$data$lon), max(model$data$lon))
+  lon_lim = model$input$lon_lim
 )
 }
 \arguments{
@@ -22,7 +20,7 @@ super_thin(
 superposing that is implemented. Can be a constant value, the median, mean, minimum, or maximum
  conditional intensity: "median_ci", "mean_ci", "min_ci", or "max_ci", respectively.}
 
-\item{model}{the output from \code{nph()}}
+\item{model}{the output from \code{misd()}}
 
 \item{method}{character string that defines residual analysis method as "superthin", "thin", or "superpose"}
 
@@ -48,7 +46,7 @@ simply considering events of type "thin" or "retain", while superpositioning onl
 by simply treating "thinned" points as "retained".
 }
 \details{
-This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library.
+This function is to be used in conjunction with the \code{misd()} function from the \code{nphawkes} library.
 
 To simulate spatial data, the user may define the \code{map} and \code{region} to easily simulate points within
 set political borders. This feature is not quite implementable, but may be soon.
@@ -57,7 +55,7 @@ latitude and longitude coordinates.
 }
 \examples{
 data("hm.csv")
-out = nph(dates = hm$t,
+out = misd(dates = hm$t,
    ref_date = "1999-10-16",
    lat = hm$lat,
    lon = hm$lon,
@@ -66,7 +64,7 @@ out = nph(dates = hm$t,
    space_breaks = c(0,0.5, 1, 10, 25, 100),
    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
    just_times = T)
-st = super_thin(K = "median_ci",
+st = super_thin(K = "min_ci",
     model = out,
     method = "superthin",
     )

@@ -25,7 +25,7 @@ This function exports a histogram of the super-thinned process.
 }
 \examples{
 data("hm.csv")
-out = nph(dates = hm$t,
+out = misd(dates = hm$t,
    ref_date = "1999-10-16",
    lat = hm$lat,
    lon = hm$lon,

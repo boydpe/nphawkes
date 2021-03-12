@@ -7,7 +7,7 @@
 se_bars(model)
 }
 \arguments{
-\item{model}{the output from \code{nph()}}
+\item{model}{the output from \code{misd()}}
 }
 \value{
 a list of variance estimates for each bin of all utilized triggering components
@@ -16,12 +16,12 @@ a list of variance estimates for each bin of all utilized triggering components
 This function estimates the variance of each bin for all utilized triggering components.
 }
 \details{
-This function is to be used in conjunction with the \code{nph()} function from the \code{nphawkes} library,
+This function is to be used in conjunction with the \code{misd()} function from the \code{nphawkes} library,
 and is used within the function that produces triggering plots.
 }
 \examples{
 data("hm.csv")
-out = nph(dates = hm$t,
+out = misd(dates = hm$t,
    ref_date = "1999-10-16",
    lat = hm$lat,
    lon = hm$lon,

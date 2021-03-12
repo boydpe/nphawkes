@@ -6,30 +6,30 @@
 \usage{
 trig_plots(
   model,
-  g_xlim = c(min(model$time_breaks), max(model$time_breaks)),
-  h_xlim = c(min(model$space_breaks), max(model$space_breaks)),
-  k_xlim = c(min(model$mark_breaks), max(model$mark_breaks)),
-  g_ylim = c(0, NA),
-  h_ylim = c(0, NA),
-  k_ylim = c(0, NA),
+  time_xlim = c(min(model$time_breaks), max(model$time_breaks)),
+  space_xlim = c(min(model$space_breaks), max(model$space_breaks)),
+  mark_xlim = c(min(model$mark_breaks), max(model$mark_breaks)),
+  time_ylim = c(0, NA),
+  space_ylim = c(0, NA),
+  mark_ylim = c(0, NA),
   mag_label = "magnitude",
   se_include = TRUE
 )
 }
 \arguments{
-\item{model}{the output from \code{nph()}}
+\item{model}{the output from \code{misd()}}
 
-\item{g_xlim}{vector of minimum and maximum x-axis value shown in the temporal plot}
+\item{time_xlim}{vector of minimum and maximum x-axis value shown in the temporal plot}
 
-\item{h_xlim}{vector of minimum and maximum x-axis value shown in the spatial plot}
+\item{space_xlim}{vector of minimum and maximum x-axis value shown in the spatial plot}
 
-\item{k_xlim}{vector of minimum and maximum x-axis value shown in the magnitude plot}
+\item{mark_xlim}{vector of minimum and maximum x-axis value shown in the magnitude plot}
 
-\item{g_ylim}{vector of minimum and maximum y-axis value shown in the temporal plot}
+\item{time_ylim}{vector of minimum and maximum y-axis value shown in the temporal plot}
 
-\item{h_ylim}{vector of minimum and maximum y-axis value shown in the spatial plot}
+\item{space_ylim}{vector of minimum and maximum y-axis value shown in the spatial plot}
 
-\item{k_ylim}{vector of minimum and maximum y-axis value shown in the magnitude plot}
+\item{mark_ylim}{vector of minimum and maximum y-axis value shown in the magnitude plot}
 
 \item{mag_label}{character string representing what the magnitude measures}
 
@@ -57,7 +57,7 @@ using \code{scale_x_continuous()} within the \code{ggplot2} library.
 }
 \examples{
 data("hm.csv")
-out = nph(dates = hm$t,
+out = misd(dates = hm$t,
    ref_date = "1999-10-16",
    lat = hm$lat,
    lon = hm$lon,
@@ -67,8 +67,8 @@ out = nph(dates = hm$t,
    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
    just_times = T)
 tp = trig_plots(out,
-    g_xlim = c(0, 2),
-    h_xlim = c(0, 10),
-    k_xlim = c(3.9, 5.1))
+    time_xlim = c(0, 2),
+    space_xlim = c(0, 10),
+    mark_xlim = c(3.9, 5.1))
 
 }

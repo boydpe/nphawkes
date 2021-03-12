@@ -23,7 +23,7 @@ This function exports a plot displaying the performance of the super-thinning pr
 }
 \examples{
 data("hm.csv")
-out = nph(dates = hm$t,
+out = misd(dates = hm$t,
    ref_date = "1999-10-16",
    lat = hm$lat,
    lon = hm$lon,

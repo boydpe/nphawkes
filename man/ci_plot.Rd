@@ -12,7 +12,7 @@ ci_plot(
 )
 }
 \arguments{
-\item{model}{the output from \code{nph()}}
+\item{model}{the output from \code{misd()}}
 
 \item{min_date}{the minimum date to be shown on the plot}
 
@@ -31,7 +31,7 @@ median value in each month and multiplying it by the number of days in that mont
 }
 \examples{
 data("hm.csv")
-out = nph(dates = hm$t,
+out = misd(dates = hm$t,
    ref_date = "1999-10-16",
    lat = hm$lat,
    lon = hm$lon,

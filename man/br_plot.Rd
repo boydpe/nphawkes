@@ -7,7 +7,7 @@
 br_plot(model, vals_include = FALSE)
 }
 \arguments{
-\item{model}{the output from \code{nph()}}
+\item{model}{the output from \code{misd()}}
 
 \item{vals_include}{if TRUE, the background rate values will be printed on the map}
 }
@@ -16,11 +16,11 @@ a ggplot of the background rates as a heat map
 }
 \description{
 This function exports a heat map of the background rate of a nonstationary background rate over space, and is paired
-with the \code{nph()} function when a nonstationary background rate is specified.
+with the \code{misd()} function when a nonstationary background rate is specified.
 }
 \examples{
 data("hm.csv")
-out = nph(dates = hm$t,
+out = misd(dates = hm$t,
    ref_date = "1999-10-16",
    lat = hm$lat,
    lon = hm$lon,
