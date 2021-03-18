@@ -63,6 +63,8 @@
 #' @return \code{n_iterations} is the number of iterations executed until convergence
 #' @return \code{locs} is a data frame listing midpoint latitude, midpoint longitude,
 #' x and y index, and background rate of the pixel each event lies in, for nonstationary background rate
+#' @return \code{x_pix} is a vector of midpoints of the x, or longitude, pixels
+#' @return \code{y_pix} is a vector of midpoints of the y, or latitude, pixels
 #' @return \code{input} is a list of all inputs
 #'
 #' @examples
@@ -304,7 +306,7 @@ misd <- function(dates, ref_date = min(dates),
              dist_bins = dist_bins, perc_br = perc_br, perc_diag = perc_diag,
              time_breaks = time_breaks, mark_breaks = mark_breaks, space_breaks = space_breaks, data = df,
              ref_date = ref_date, n_iterations = n_iterations,
-             pix = pix, x_pix = x_pix, y_pix = y_pix,
+             locs = locs, x_pix = x_pix, y_pix = y_pix,
              input = mget(names(formals()),sys.frame(sys.nframe())))
   return(out)
 }

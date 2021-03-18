@@ -92,6 +92,10 @@ is as a background event
 \code{locs} is a data frame listing midpoint latitude, midpoint longitude,
 x and y index, and background rate of the pixel each event lies in, for nonstationary background rate
 
+\code{x_pix} is a vector of midpoints of the x, or longitude, pixels
+
+\code{y_pix} is a vector of midpoints of the y, or latitude, pixels
+
 \code{input} is a list of all inputs
 }
 \description{
