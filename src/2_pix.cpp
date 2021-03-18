@@ -13,7 +13,7 @@ NumericVector get_pix(NumericVector x_grid, NumericVector y_grid,
   NumericVector x_loc(n);
   NumericVector y_loc(n);
 
-  NumericMatrix locs(n,2);
+  NumericMatrix locs(n,4);
 
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < (m-1); j++) {
