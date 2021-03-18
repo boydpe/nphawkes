@@ -206,7 +206,7 @@ misd <- function(dates, ref_date = min(dates),
   # select proper br in prob calcs
   pix = get_pix(x_grid, y_grid, lat, lon, x_pix, y_pix)
   pix = data.frame(pix)
-  names(pix) = c("lon", "lat")
+  names(pix) = c("lon", "lat", "x", "y")
 
   # implement option of bin by quantile
   if(is.na(time_quantile) == FALSE){
