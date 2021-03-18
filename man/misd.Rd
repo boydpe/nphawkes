@@ -89,6 +89,9 @@ is as a background event
 
 \code{n_iterations} is the number of iterations executed until convergence
 
+\code{locs} is a data frame listing midpoint latitude, midpoint longitude,
+x and y index, and background rate of the pixel each event lies in, for nonstationary background rate
+
 \code{input} is a list of all inputs
 }
 \description{
