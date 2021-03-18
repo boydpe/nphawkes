@@ -28,6 +28,6 @@ out = misd(dates = hm$t,
    space_breaks = c(0,0.5, 1, 10, 25, 100),
    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
    just_times = T)
-st = super_thin(out)
-ci_h = ci_hist(st)
+st = super_thin(out, K = "max_ci")
+ci_h = ci_hist(st, nbins = 40)
 }

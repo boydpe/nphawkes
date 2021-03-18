@@ -455,7 +455,7 @@ cond_int = function(model) {
 #'    space_breaks = c(0,0.5, 1, 10, 25, 100),
 #'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
 #'    just_times = T)
-#' st = super_thin(K = "min_ci",
+#' st = super_thin(K = "max_ci",
 #'     model = out,
 #'     method = "superthin",
 #'     )
@@ -1087,8 +1087,8 @@ st_plot = function(superthin, method = "superthin",
 #'    space_breaks = c(0,0.5, 1, 10, 25, 100),
 #'    mark_breaks = c(3, 3.1,3.3, 4, 5, 8),
 #'    just_times = T)
-#' st = super_thin(out)
-#' ci_h = ci_hist(st)
+#' st = super_thin(out, K = "max_ci")
+#' ci_h = ci_hist(st, nbins = 40)
 
 #' @export
 ci_hist = function(superthin, nbins = 30){
