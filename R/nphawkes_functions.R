@@ -7,6 +7,7 @@
 # devtools::load_all() #to temp install
 # library(nphawkes) #to use
 
+
 # Nonparametric Hawkes ----------------------------------------------------
 
 #' Model Independent Stochastic Declustering
