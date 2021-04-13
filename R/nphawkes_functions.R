@@ -749,7 +749,9 @@ se_bars = function(model){
   }
 
   thetak = thetak / nt
-  vark = as.vector(nt * thetak*(1 - thetak)/ (table(model$mark_bins)^2))
+  vark = as.vector(nt * thetak*(1 - thetak)/
+                     (table(factor(model$mark_bins,
+                                  levels = 0:(length(mark_breaks) - 2)))^2))
 
   # spatial standard error
   for(i in 2: nrow(model$p0)){
@@ -832,7 +834,7 @@ trig_plots = function(model,
   space_breaks = model$space_breaks
   n3 = length(space_breaks)
 
-  ser = se_bars(model)
+  ser = nphawkes::se_bars(model)
   se_g = sqrt(ser$varg)
   se_k = sqrt(ser$vark)
   se_h = sqrt(ser$varh)
