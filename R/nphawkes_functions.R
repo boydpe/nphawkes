@@ -188,6 +188,9 @@ misd <- function(dates, ref_date = min(dates),
   # THREE: nonstationary background rate
   diag(dist_mat) = 0
 
+  lon_lim = c(min(df$lon), max(df$lon), (max(df$lon) - min(df$lon))/10)
+  lat_lim = c(min(df$lat), max(df$lat), (max(df$lat) - min(df$lat))/10)
+
   # create spatial grid to contain events
   x_grid = seq(lon_lim[1], lon_lim[2], lon_lim[3])
   y_grid = seq(lat_lim[1], lat_lim[2], lat_lim[3])
@@ -201,7 +204,7 @@ misd <- function(dates, ref_date = min(dates),
 
   # calculate radii such that np number of events are within
   # distance d_i
-  di = calc_d(dist_mat2, np = floor(0.05*n))# was doing 24
+  di = calc_d(dist_mat2, np = floor(50))# was doing 24 then 0.05*n
 
   # put all events into a pixel
   # select proper br in prob calcs
@@ -278,6 +281,8 @@ misd <- function(dates, ref_date = min(dates),
     max_diff = check_p(p0, p)
     p0 = p
     n_iterations = n_iterations + 1
+    print(max_diff)
+    print(n_iterations)
   }
 
   max_diag = c()
@@ -301,6 +306,10 @@ misd <- function(dates, ref_date = min(dates),
 
   perc_br = sum(max_diag) / length(max_diag)
   perc_diag = sum(diag(p0)) / nrow(p0)
+
+  if(nonstat_br == FALSE){
+    locs = NA
+  }
 
   out = list(p0 = p0, g= g, h = h, k = k, br = br,  br_grid = br_grid,
              time_bins = time_bins, mark_bins = mark_mat,
@@ -882,7 +891,8 @@ trig_plots = function(model,
 
   trig_g = trig_g + ggplot2::geom_step(ggplot2::aes(group=1)) +
     ggplot2::scale_x_continuous(breaks = round(model$time_breaks, 1),
-                                minor_breaks = time_breaks) +
+                                minor_breaks = time_breaks) + #,
+                                #guide = ggplot2::guide_axis(n.dodge=4)) +
     ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
                shape = 21,
                data = data.frame(
@@ -892,6 +902,9 @@ trig_plots = function(model,
                )) +
     ggplot2::scale_fill_manual(values = c("black", "white")) +
     ggplot2::theme(legend.position = "none")
+    # ggplot2::theme(axis.text.x =
+    #                  ggplot2::element_text(angle = 45, hjust = 1))
+
 
   # Magnitude Plot
   if (sum(model$mark_bins) != 0){
@@ -928,7 +941,9 @@ trig_plots = function(model,
                  type = c("a", rep(c("a", "b"), times = (n2-2)))
                )) +
     ggplot2::scale_fill_manual(values = c("black", "white")) +
-    ggplot2::theme(legend.position = "none")
+    ggplot2::theme(legend.position = "none") +
+    ggplot2::theme(axis.text.x =
+                     ggplot2::element_text(angle = 45, hjust = 1))
   } else {
     trig_k = NULL
   }
@@ -965,7 +980,9 @@ trig_plots = function(model,
                  type = c(rep(c("a", "b"), times = (n3-2)*2))
                )) +
     ggplot2::scale_fill_manual(values = c("black", "white")) +
-    ggplot2::theme(legend.position = "none")
+    ggplot2::theme(legend.position = "none") +
+    ggplot2::theme(axis.text.x =
+                     ggplot2::element_text(angle = 45, hjust = 1))
 
   } else {
     trig_h = NULL
@@ -1182,7 +1199,7 @@ ci_plot = function(model, min_date = model$input$ref_date,
                        linetype = "solid") +
     ggplot2::theme(axis.title.y=ggplot2::element_blank(),
         legend.position = "right") +
-        ggplot2::scale_linetype_manual(name = "Number of \nMonthly Events",
+    ggplot2::scale_linetype_manual(name = "Number of \nMonthly Events",
                         labels = c("Observed", "Estimated"),
                         values = c("solid", "dashed")) +
     ggplot2::ggtitle(plot_title)
