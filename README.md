@@ -17,4 +17,4 @@ library(devtools)
 
 devtools::install\_github(“boydpe/nphawkes”)
 
-library(nphawke)
+library(nphawkes)
