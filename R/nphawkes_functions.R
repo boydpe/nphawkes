@@ -104,7 +104,7 @@ misd <- function(dates, ref_date = min(dates),
                 just_times = FALSE, nonstat_br = FALSE,
                 lon_lim = c(min(lon), max(lon), (max(lon) - min(lon))/10),
                 lat_lim = c(min(lat), max(lat), (max(lat) - min(lat))/10),
-                time_unit = "day", dist_unit = "mile"){
+                time_unit = "day", dist_unit = "mile", show_progress = FALSE){
 
   # create times from dates
   df = data.frame(dates, lat, lon, marks)
@@ -281,8 +281,11 @@ misd <- function(dates, ref_date = min(dates),
     max_diff = check_p(p0, p)
     p0 = p
     n_iterations = n_iterations + 1
-    print(max_diff)
-    print(n_iterations)
+
+    if(show_progress == TRUE){
+      print(max_diff)
+      print(n_iterations)
+    }
   }
 
   max_diag = c()

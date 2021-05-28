@@ -23,7 +23,8 @@ misd(
   lon_lim = c(min(lon), max(lon), (max(lon) - min(lon))/10),
   lat_lim = c(min(lat), max(lat), (max(lat) - min(lat))/10),
   time_unit = "day",
-  dist_unit = "mile"
+  dist_unit = "mile",
+  show_progress = FALSE
 )
 }
 \arguments{
