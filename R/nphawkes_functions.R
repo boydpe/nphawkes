@@ -904,9 +904,9 @@ trig_plots = function(model,
                  type = c(rep(c("a", "b"), times = (n1-2)*2))
                )) +
     ggplot2::scale_fill_manual(values = c("black", "white")) +
-    ggplot2::theme(legend.position = "none")
-    # ggplot2::theme(axis.text.x =
-    #                  ggplot2::element_text(angle = 45, hjust = 1))
+    ggplot2::theme(legend.position = "none") +
+    ggplot2::theme(axis.text.x =
+                     ggplot2::element_text(angle = 45, hjust = 1))
 
 
   # Magnitude Plot
