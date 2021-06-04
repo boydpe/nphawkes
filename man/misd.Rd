@@ -10,12 +10,9 @@ misd(
   lat = rep(0, length(dates)),
   lon = rep(0, length(dates)),
   marks = rep(0, length(dates)),
-  time_breaks = c(0, 1),
-  space_breaks = c(0, 1),
-  mark_breaks = c(0, 1),
-  time_quantile = NA,
-  mark_quantile = NA,
-  space_quantile = NA,
+  time_breaks = NULL,
+  space_breaks = NULL,
+  mark_breaks = NULL,
   stopwhen = 0.001,
   time_of_day = NA,
   just_times = FALSE,
@@ -44,20 +41,14 @@ misd(
 
 \item{mark_breaks}{a vector of cutoff values for magnitude bins}
 
-\item{time_quantile}{NA by default to use defined temporal bins, integer \code{n} value will
-establish n time bins containing roughly equal number of pairwise time differences}
-
-\item{mark_quantile}{NA by default to use defined magnitude bins, integer \code{n} value will
-establish n mark bins containing roughly equal number of events}
-
-\item{space_quantile}{NA by default to use defined spatial bins, integer \code{n} value will
-establish n spatial bins containing roughly equal number of pairwise spatial differences}
-
 \item{time_of_day}{character string that lists the time of day of events, as hour:minute:second}
 
 \item{time_unit}{character string that specifies the desired unit of time}
 
 \item{dist_unit}{character string that specifies the desired unit of distance: meter, kilometer, or mile}
+
+\item{show_progress}{when TRUE, algorithm will print the iteration number and maximum
+pairwise change in the probability matrix.}
 
 \item{just_time}{TRUE or FALSE object. TRUE if \code{dates} object is a vector of only times,
 indicating time elapsed since beginning of catalog.}
@@ -110,9 +101,9 @@ consisting of time and space, time and marks, or time and space and marks.
 
 For each triggering component used (time, space, marks), a binning structure will be applied. The user may define
 these right continuous bins as a vector (\code{c(1,5,10)} creates two bins for \eqn{1 < x \le 5}, and \eqn{5 < x \le 10}),
-or n time bins may be generated automatically by specifying \code{time_quantile = n}, with the same applying for marks and space.
-This method will establish breaks such that the allocation of time differences within the data will be roughly
-equal in each created bin. Uniform binning methods may unattainable for discrete marks containing many replicates of values.
+or 11 time bins may be generated automatically by specifying \code{time_quantile = n}, with the same applying for marks and space.
+This method will establish breaks such that the allocation of time differences will be assigned on the log scale,
+creating smaller bins close to 0 and larger bins at greater time or space differences.
 
 If no time of day is provided, events will be randomly assigned a time during the event's date.
 }

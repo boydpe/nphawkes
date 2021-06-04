@@ -21,9 +21,9 @@
 #'
 #' For each triggering component used (time, space, marks), a binning structure will be applied. The user may define
 #' these right continuous bins as a vector (\code{c(1,5,10)} creates two bins for \eqn{1 < x \le 5}, and \eqn{5 < x \le 10}),
-#' or n time bins may be generated automatically by specifying \code{time_quantile = n}, with the same applying for marks and space.
-#' This method will establish breaks such that the allocation of time differences within the data will be roughly
-#' equal in each created bin. Uniform binning methods may unattainable for discrete marks containing many replicates of values.
+#' or 11 time bins may be generated automatically by specifying \code{time_quantile = n}, with the same applying for marks and space.
+#' This method will establish breaks such that the allocation of time differences will be assigned on the log scale,
+#' creating smaller bins close to 0 and larger bins at greater time or space differences.
 #'
 #' If no time of day is provided, events will be randomly assigned a time during the event's date.
 #'
@@ -34,12 +34,6 @@
 #' @param time_breaks a vector of cutoff values for temporal bins of time differences
 #' @param space_breaks a vector of cutoff values for spatial bins of distance differences
 #' @param mark_breaks a vector of cutoff values for magnitude bins
-#' @param time_quantile NA by default to use defined temporal bins, integer \code{n} value will
-#' establish n time bins containing roughly equal number of pairwise time differences
-#' @param space_quantile NA by default to use defined spatial bins, integer \code{n} value will
-#' establish n spatial bins containing roughly equal number of pairwise spatial differences
-#' @param mark_quantile NA by default to use defined magnitude bins, integer \code{n} value will
-#' establish n mark bins containing roughly equal number of events
 #' @param ref_date a date to serve as time 0, defaults to earliest observation
 #' @param time_of_day character string that lists the time of day of events, as hour:minute:second
 #' @param just_time TRUE or FALSE object. TRUE if \code{dates} object is a vector of only times,
@@ -47,6 +41,8 @@
 #' @param time_unit character string that specifies the desired unit of time
 #' @param dist_unit character string that specifies the desired unit of distance: meter, kilometer, or mile
 #' @param stop_when scalar that serves as conversion criterion, 1e-3 as default
+#' @param show_progress when TRUE, algorithm will print the iteration number and maximum
+#' pairwise change in the probability matrix.
 #'
 #' @return Probability matrix \code{p0} containing the probabilities that event
 #' \code{i} is an offspring of event \code{j}, \code{i > j}. Diagonal elements
@@ -97,9 +93,8 @@ misd <- function(dates, ref_date = min(dates),
                 lat = rep(0, length(dates)),
                 lon = rep(0, length(dates)),
                 marks = rep(0, length(dates)),
-                time_breaks = c(0,1), space_breaks = c(0,1),
-                mark_breaks = c(0,1), time_quantile = NA,
-                mark_quantile = NA, space_quantile = NA,
+                time_breaks = NULL, space_breaks = NULL,
+                mark_breaks = NULL,
                 stopwhen = 1e-3, time_of_day = NA,
                 just_times = FALSE, nonstat_br = FALSE,
                 lon_lim = c(min(lon), max(lon), (max(lon) - min(lon))/10),
@@ -212,30 +207,24 @@ misd <- function(dates, ref_date = min(dates),
   pix = data.frame(pix)
   names(pix) = c("lon", "lat", "x", "y")
 
-  # implement option of bin by quantile
-  if(is.na(time_quantile) == FALSE){
-    time_mat1 = time_mat
-    time_mat1[lower.tri(time_mat1, diag = TRUE)] = NA
-    time_breaks = as.vector(quantile(time_mat1, na.rm = TRUE,
-                                probs = seq(0,1, length.out= time_quantile + 1)))
-    time_breaks[length(time_breaks)] = time_breaks[length(time_breaks)] + 1
-    time_breaks[1] = 0
+  # default bins to log scale with 11 bins
+  if(is.null(time_breaks) == TRUE){
+    max_time = max(time_mat, na.rm = TRUE)*1.001
+    time_breaks = c(0, exp(seq(log(1e-3), log(max_time),
+                               length.out = 10)))
   } else {time_breaks = time_breaks}
 
-  if(is.na(mark_quantile) == FALSE){
-    mark_breaks = unique(as.vector(quantile(marks,
-                                       probs = seq(0, 1, length.out = mark_quantile + 1))))
-    mark_breaks[length(mark_breaks)] = mark_breaks[length(mark_breaks)] + 1
-    mark_breaks[1] = 0 # accounts for simulating points below lowest bin
+  if(is.null(mark_breaks) == TRUE){
+    max_mark = max(marks) * 1.001
+    min_mark = min(marks) * 0.999
+    mark_breaks = exp(seq(log(min_mark), log(max_mark), length.out = 11))
+    # mark_breaks[1] = 0 # accounts for simulating points below lowest bin
   } else {mark_breaks = mark_breaks}
 
-  if(is.na(space_quantile) == FALSE){
-    dist_mat1 = dist_mat
-    dist_mat1[lower.tri(dist_mat1, diag = TRUE)] = NA
-    space_breaks = as.vector(quantile(dist_mat1, na.rm = TRUE,
-                                probs = seq(0,1, length.out= space_quantile + 1)))
-    space_breaks[length(space_breaks)] = space_breaks[length(space_breaks)] + 1
-    space_breaks[1] = 0
+  if(is.null(space_breaks) == TRUE){
+    max_dist = max(dist_mat, na.rm = TRUE)*1.001
+    space_breaks = c(0, exp(seq(log(1e-3), log(max_dist),
+                                 length.out = 10)))
   } else {space_breaks = space_breaks}
 
   # place time, dist, and marks in bins
@@ -276,15 +265,15 @@ misd <- function(dates, ref_date = min(dates),
                  space_breaks, time_breaks, mark_breaks,
                  br, time_bins, dist_bins, lat)
     # rounding difference may cause insignificant negatives
-    # replace trace neagtives by 0
+    # replace trace negatives by 0
     p = ifelse(p<0, 0, p)
     max_diff = check_p(p0, p)
     p0 = p
     n_iterations = n_iterations + 1
 
     if(show_progress == TRUE){
-      print(max_diff)
-      print(n_iterations)
+      print(paste("n: ", n_iterations))
+      print(paste("max diff: ", max_diff))
     }
   }
 
