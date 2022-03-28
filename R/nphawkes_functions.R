@@ -818,14 +818,17 @@ se_bars = function(model){
 #'
 #' @export
 trig_plots = function(model,
-                      time_xlim = c(min(model$time_breaks), max(model$time_breaks)),
-                      space_xlim = c(min(model$space_breaks), max(model$space_breaks)),
-                      mark_xlim = c(min(model$mark_breaks), max(model$mark_breaks)),
-                      time_ylim = c(0,NA),
-                      space_ylim = c(0,NA),
-                      mark_ylim = c(0,NA),
-                      mag_label = "magnitude",
-                      se_include = TRUE){
+                           time_xlim = c(min(model$time_breaks), max(model$time_breaks)),
+                           space_xlim = c(min(model$space_breaks), max(model$space_breaks)),
+                           mark_xlim = c(min(model$mark_breaks), max(model$mark_breaks)),
+                           time_ticks = NULL,
+                           space_ticks = NULL,
+                           mark_ticks = NULL,
+                           time_ylim = c(0,NA),
+                           space_ylim = c(0,NA),
+                           mark_ylim = c(0,NA),
+                           mag_label = "magnitude",
+                           se_include = TRUE){
 
   time_breaks = model$time_breaks
   n1 = length(time_breaks)
@@ -849,15 +852,15 @@ trig_plots = function(model,
                       se = c(se_k, se_k[length(se_k)]))
 
   dist_df = data.frame(h = c(model$h, model$h[length(model$h)]),
-                        dist = space_breaks,
+                       dist = space_breaks,
                        se = c(se_h, se_h[length(se_h)]))
 
   time_ylim[2] = ifelse(is.na(time_ylim[2]) == TRUE,
-                     max(time_df$g + time_df$se), time_ylim[2])
+                        max(time_df$g + time_df$se), time_ylim[2])
   space_ylim[2] = ifelse(is.na(space_ylim[2]) == TRUE,
-                     max(dist_df$h + dist_df$se), space_ylim[2])
+                         max(dist_df$h + dist_df$se), space_ylim[2])
   mark_ylim[2] = ifelse(is.na(mark_ylim[2]) == TRUE,
-                     max(mag_df$k + mag_df$se), mark_ylim[2])
+                        max(mag_df$k + mag_df$se), mark_ylim[2])
 
 
   # Time Plot
@@ -867,31 +870,35 @@ trig_plots = function(model,
     ggplot2::ylab("g(t)")
 
   if(se_include == TRUE) {
-  for (i in 1:(n1-1)){
-    trig_g = trig_g +
-      ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
-                                   data = data.frame(
-                                     x = c(time_df$time[i], time_df$time[i+1],
-                                           time_df$time[i+1], time_df$time[i]),
-                                     y = c(max(time_df$g[i] - 2*time_df$se[i], 0),
-                                           max(time_df$g[i] - 2*time_df$se[i], 0),
-                                           time_df$g[i] + 2*time_df$se[i],
-                                           time_df$g[i] + 2*time_df$se[i]) ),
-                                   fill = "grey")
+    for (i in 1:(n1-1)){
+      trig_g = trig_g +
+        ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
+                              data = data.frame(
+                                x = c(time_df$time[i], time_df$time[i+1],
+                                      time_df$time[i+1], time_df$time[i]),
+                                y = c(max(time_df$g[i] - 2*time_df$se[i], 0),
+                                      max(time_df$g[i] - 2*time_df$se[i], 0),
+                                      time_df$g[i] + 2*time_df$se[i],
+                                      time_df$g[i] + 2*time_df$se[i]) ),
+                              fill = "grey")
+    }
   }
+
+  if(is.null(time_ticks) == TRUE) {
+    time_ticks = time_breaks
   }
 
   trig_g = trig_g + ggplot2::geom_step(ggplot2::aes(group=1)) +
-    ggplot2::scale_x_continuous(breaks = round(model$time_breaks, 1),
-                                minor_breaks = time_breaks) + #,
-                                #guide = ggplot2::guide_axis(n.dodge=4)) +
+    ggplot2::scale_x_continuous(breaks = round(time_ticks, 1),
+                                minor_breaks = time_ticks) + #,
+    #guide = ggplot2::guide_axis(n.dodge=4)) +
     ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
-               shape = 21,
-               data = data.frame(
-                 x = sort(rep(time_df$time, 2))[-c(1,2,2*n1 -1 ,2*n1)],
-                 y = c(rep(time_df$g[1:(n1-2)], each = 2)[-1], time_df$g[n1]),
-                 type = c(rep(c("a", "b"), times = (n1-2)*2))
-               )) +
+                        shape = 21,
+                        data = data.frame(
+                          x = sort(rep(time_df$time, 2))[-c(1,2,2*n1 -1 ,2*n1)],
+                          y = c(rep(time_df$g[1:(n1-2)], each = 2)[-1], time_df$g[n1]),
+                          type = c(rep(c("a", "b"), times = (n1-2)*2))
+                        )) +
     ggplot2::scale_fill_manual(values = c("black", "white")) +
     ggplot2::theme(legend.position = "none") +
     ggplot2::theme(axis.text.x =
@@ -900,42 +907,44 @@ trig_plots = function(model,
 
   # Magnitude Plot
   if (sum(model$mark_bins) != 0){
-  trig_k = ggplot2::ggplot(mag_df, ggplot2::aes(magnitude, k)) +
-    ggplot2::coord_cartesian(xlim = mark_xlim, ylim = mark_ylim) +
-    ggplot2::xlab(paste("m (", mag_label, ")", sep = "")) +
-    ggplot2::ylab("k(m)")
+    trig_k = ggplot2::ggplot(mag_df, ggplot2::aes(magnitude, k)) +
+      ggplot2::coord_cartesian(xlim = mark_xlim, ylim = mark_ylim) +
+      ggplot2::xlab(paste("m (", mag_label, ")", sep = "")) +
+      ggplot2::ylab("k(m)")
 
-  if(se_include == TRUE){
-  for (i in 1:(n2-1)){
-    trig_k = trig_k + ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
-                                   data = data.frame(
-                                     x = c(mag_df$magnitude[i], mag_df$magnitude[i+1],
-                                           mag_df$magnitude[i+1], mag_df$magnitude[i]),
-                                     y = c(max(mag_df$k[i] - 2*mag_df$se[i], 0),
-                                           max(mag_df$k[i] - 2*mag_df$se[i], 0),
-                                           mag_df$k[i] + 2*mag_df$se[i],
-                                           mag_df$k[i] + 2*mag_df$se[i])),
-                                   fill = "grey")
-  }
-  }
+    if(se_include == TRUE){
+      for (i in 1:(n2-1)){
+        trig_k = trig_k + ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
+                                                data = data.frame(
+                                                  x = c(mag_df$magnitude[i], mag_df$magnitude[i+1],
+                                                        mag_df$magnitude[i+1], mag_df$magnitude[i]),
+                                                  y = c(max(mag_df$k[i] - 2*mag_df$se[i], 0),
+                                                        max(mag_df$k[i] - 2*mag_df$se[i], 0),
+                                                        mag_df$k[i] + 2*mag_df$se[i],
+                                                        mag_df$k[i] + 2*mag_df$se[i])),
+                                                fill = "grey")
+      }
+    }
 
-  trig_k = trig_k + ggplot2::geom_step(ggplot2::aes(group=1)) +
-    ggplot2::scale_x_continuous(breaks =
-                         c(round(min(model$input$marks),1),
-                           round(model$mark_breaks[-1],1)),
-                         minor_breaks = c(round(min(model$input$marks),1),
-                                          round(model$mark_breaks[-1],1))) +
-    ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
-               shape = 21,
-               data = data.frame(
-                 x = sort(rep(mag_df$magnitude, 2))[-c(2, 2*n2 -1 ,2*n2)],
-                 y = c(rep(mag_df$k[1:(n2-2)], each = 2), mag_df$k[n2]),
-                 type = c("a", rep(c("a", "b"), times = (n2-2)))
-               )) +
-    ggplot2::scale_fill_manual(values = c("black", "white")) +
-    ggplot2::theme(legend.position = "none") +
-    ggplot2::theme(axis.text.x =
-                     ggplot2::element_text(angle = 45, hjust = 1))
+    if(is.null(mark_ticks) == TRUE) {
+      mark_ticks = c(round(min(model$input$marks),1),
+                     round(model$mark_breaks[-1],1))
+    }
+
+    trig_k = trig_k + ggplot2::geom_step(ggplot2::aes(group=1)) +
+      ggplot2::scale_x_continuous(breaks = mark_ticks,
+                                  minor_breaks = mark_ticks) +
+      ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
+                          shape = 21,
+                          data = data.frame(
+                            x = sort(rep(mag_df$magnitude, 2))[-c(2, 2*n2 -1 ,2*n2)],
+                            y = c(rep(mag_df$k[1:(n2-2)], each = 2), mag_df$k[n2]),
+                            type = c("a", rep(c("a", "b"), times = (n2-2)))
+                          )) +
+      ggplot2::scale_fill_manual(values = c("black", "white")) +
+      ggplot2::theme(legend.position = "none") +
+      ggplot2::theme(axis.text.x =
+                       ggplot2::element_text(angle = 45, hjust = 1))
   } else {
     trig_k = NULL
   }
@@ -943,38 +952,42 @@ trig_plots = function(model,
   #Space Plot
   if(sum(model$dist_bins) != 0) {
 
-  trig_h = ggplot2::ggplot(dist_df, ggplot2::aes(dist, h)) +
-    ggplot2::coord_cartesian(xlim = space_xlim, ylim = space_ylim) +
-    ggplot2::xlab(paste("s (distance in ", model$input$dist_unit, "s)", sep = "")) +
-    ggplot2::ylab("h(s)")
+    trig_h = ggplot2::ggplot(dist_df, ggplot2::aes(dist, h)) +
+      ggplot2::coord_cartesian(xlim = space_xlim, ylim = space_ylim) +
+      ggplot2::xlab(paste("s (distance in ", model$input$dist_unit, "s)", sep = "")) +
+      ggplot2::ylab("h(s)")
 
-  if(se_include == TRUE){
-  for (i in 1:(n1-1)){
-    trig_h = trig_h + ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
-                                   data = data.frame(
-                                     x = c(dist_df$dist[i], dist_df$dist[i+1],
-                                           dist_df$dist[i+1], dist_df$dist[i]),
-                                     y = c(max(dist_df$h[i] - 2*dist_df$se[i], 0),
-                                           max(dist_df$h[i] - 2*dist_df$se[i], 0),
-                                           dist_df$h[i] + 2*dist_df$se[i],
-                                           dist_df$h[i] + 2*dist_df$se[i]) ),
-                                   fill = "grey")
-  }
-  }
+    if(se_include == TRUE){
+      for (i in 1:(n1-1)){
+        trig_h = trig_h + ggplot2::geom_polygon(ggplot2::aes(x = x, y = y),
+                                                data = data.frame(
+                                                  x = c(dist_df$dist[i], dist_df$dist[i+1],
+                                                        dist_df$dist[i+1], dist_df$dist[i]),
+                                                  y = c(max(dist_df$h[i] - 2*dist_df$se[i], 0),
+                                                        max(dist_df$h[i] - 2*dist_df$se[i], 0),
+                                                        dist_df$h[i] + 2*dist_df$se[i],
+                                                        dist_df$h[i] + 2*dist_df$se[i]) ),
+                                                fill = "grey")
+      }
+    }
 
-  trig_h = trig_h + ggplot2::geom_step(ggplot2::aes(group=1)) +
-    ggplot2::scale_x_continuous(breaks = round(model$space_breaks, 1)) +
-    ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
-               shape = 21,
-               data = data.frame(
-                 x = sort(rep(dist_df$dist, 2))[-c(1,2,2*n3 -1 ,2*n3)],
-                 y = c(rep(dist_df$h[1:(n3-2)], each = 2)[-1], dist_df$h[n3]),
-                 type = c(rep(c("a", "b"), times = (n3-2)*2))
-               )) +
-    ggplot2::scale_fill_manual(values = c("black", "white")) +
-    ggplot2::theme(legend.position = "none") +
-    ggplot2::theme(axis.text.x =
-                     ggplot2::element_text(angle = 45, hjust = 1))
+    if(is.null(space_ticks) == TRUE) {
+      space_ticks = space_breaks
+    }
+
+    trig_h = trig_h + ggplot2::geom_step(ggplot2::aes(group=1)) +
+      ggplot2::scale_x_continuous(breaks = round(space_ticks, 1)) +
+      ggplot2::geom_point(ggplot2::aes(x = x, y = y, fill = type),
+                          shape = 21,
+                          data = data.frame(
+                            x = sort(rep(dist_df$dist, 2))[-c(1,2,2*n3 -1 ,2*n3)],
+                            y = c(rep(dist_df$h[1:(n3-2)], each = 2)[-1], dist_df$h[n3]),
+                            type = c(rep(c("a", "b"), times = (n3-2)*2))
+                          )) +
+      ggplot2::scale_fill_manual(values = c("black", "white")) +
+      ggplot2::theme(legend.position = "none") +
+      ggplot2::theme(axis.text.x =
+                       ggplot2::element_text(angle = 45, hjust = 1))
 
   } else {
     trig_h = NULL
@@ -991,9 +1004,10 @@ trig_plots = function(model,
   }
 
   out = list(all_plots = all_plots, time_plot = trig_g,
-         space_plot = trig_h, mark_plot = trig_k)
+             space_plot = trig_h, mark_plot = trig_k)
   return(out)
 }
+
 
 
 

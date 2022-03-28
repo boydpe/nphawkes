@@ -22,6 +22,6 @@ Imports:
     maps,
     sp,
     magrittr
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 LinkingTo: Rcpp
 VignetteBuilder: knitr
